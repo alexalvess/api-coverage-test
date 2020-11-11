@@ -22,6 +22,7 @@ jobs:
         node-version: 10.x
     - run: npm install
     - run: npm install -g tfx-cli
+    - run: tsc buildAndReleaseTask/index.ts
     - name: Publish Extension
       run: tfx extension publish --manifest-globs vss-extension.json --token ${{ secrets.VS_MARKET_PLACE_TOKEN }} --rev-version
     - name: Update resources
