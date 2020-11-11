@@ -20,9 +20,11 @@ jobs:
       uses: actions/setup-node@v1
       with:
         node-version: 10.x
+    - run: cd buildAndReleaseTask
     - run: npm install
     - run: npm install -g tfx-cli
-    - run: tsc buildAndReleaseTask/index.ts
+    - run: tsc
+    - run: cd ../
     - name: Publish Extension
       run: tfx extension publish --manifest-globs vss-extension.json --token ${{ secrets.VS_MARKET_PLACE_TOKEN }} --rev-version
     - name: Update resources
