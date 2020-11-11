@@ -7,33 +7,35 @@ var EndpointModel = /** @class */ (function () {
         this.path = '';
         this.infoPath = new Array();
     }
-    EndpointModel.prototype.addInfoPath = function (verb, time, executeAt) {
+    EndpointModel.prototype.addInfoPath = function (verb, time, executeAt, success, message) {
         if (!this.infoPath.find(function (f) { return f.verb === verb.toUpperCase(); })) {
             var infoPath = new InfoPathModel_1.InfoPathModel(verb.toUpperCase());
-            infoPath.setTime(time);
-            infoPath.setExecuteDate(executeAt);
+            infoPath.time = time;
+            infoPath.executeAt = executeAt;
+            infoPath.success = success;
+            infoPath.failureMessage = message;
             this.infoPath.push(infoPath);
         }
     };
-    EndpointModel.prototype.setByTestProp = function (testName, time, executeAt) {
+    EndpointModel.prototype.setByTestProp = function (testName, time, executeAt, success, message) {
         var info = testName.split(' ');
         var path = info[info.length - 1];
         var verb = info[info.length - 2];
         this.path = path;
-        this.addInfoPath(verb, time, executeAt);
+        this.addInfoPath(verb, time, executeAt, success, message);
     };
-    EndpointModel.setSamePath = function (endpoints, testName, time, executeAt) {
+    EndpointModel.setSamePath = function (endpoints, testName, time, executeAt, success, message) {
         var info = testName.split(' ');
         var path = info[info.length - 1];
         var verb = info[info.length - 2];
         var endpoint = endpoints.find(function (f) { return f.path === path; });
         if (endpoint) {
-            endpoint.addInfoPath(verb, time, executeAt);
+            endpoint.addInfoPath(verb, time, executeAt, success, message);
         }
         else {
             endpoint = new EndpointModel();
             endpoint.path = path;
-            endpoint.addInfoPath(verb, time, executeAt);
+            endpoint.addInfoPath(verb, time, executeAt, success, message);
             endpoints.push(endpoint);
         }
     };

@@ -8,12 +8,6 @@ var InfoPathModel = /** @class */ (function () {
         this.executeAt = new Date();
         this.success = true;
     }
-    InfoPathModel.prototype.setTime = function (time) {
-        this.time = time;
-    };
-    InfoPathModel.prototype.setExecuteDate = function (executeAt) {
-        this.executeAt = executeAt;
-    };
     return InfoPathModel;
 }());
 exports.InfoPathModel = InfoPathModel;

@@ -11,12 +11,4 @@ export class InfoPathModel {
         this.executeAt = new Date();
         this.success = true;
     }
-
-    public setTime(time: number): void {
-        this.time = time;
-    }
-
-    public setExecuteDate(executeAt: Date): void {
-        this.executeAt = executeAt;
-    }
 }

@@ -29,34 +29,49 @@ And the second option, which is "Test Case", refers to test name is located into
 When the generate coverage processing to end, the custom task will call an API, if the Webhook field is filled, and will pass some datas of the coverage generated.
 The payload model that will be generated is:
 
+**VERB**: POST
+
 ```json
-"apiTested": "String",
-"tests": [
-    {
-        "createAt": "DateTime",
-        "buildNumber": "String",
-        "totalEndpointsFound": "Number",
-        "totalEndpointsTested": "Number",
-        "coverage": "Number",
-        "totalTime": "Number",
-        "totalSucceed": "Number",
-        "totalFailure": "Number",
-        "endpoints": [
-            {
-                "path": "String",
-                "infoPath": [
-                    {
-                        "verb": "String",
-                        "executeAt": "DateTime",
-                        "success": "Boolean",
-                        "time": "Number",
-                        "failureMessage": "String"
-                    }
-                ]
-            }
-        ]
-    }
-]
+{
+	"application": "string",
+	"apiTested": "string",
+	"createAt": "date",
+	"buildNumber": "string",
+	"totalEndpointsFound": "number",
+	"totalEndpointsTested": "number",
+	"coverage": "number",
+	"endpointsFound": [{
+		"path": "string",
+		"infoPath": [{
+			"verb": "string",
+			"time": "number",
+			"executeAt": "Date",
+			"success": "string"
+		}]
+	}],
+	"endpointsTested": [{
+		"path": "string",
+		"infoPath": [{
+			"verb": "string",
+			"time": "string",
+			"executeAt": "Date",
+			"success": "boolean",
+			"failureMessage": "string"
+		}]
+	}],
+	"endpointsUncover": [{
+		"path": "string",
+		"infoPath": [{
+			"verb": "string",
+			"time": "number",
+			"executeAt": "Date",
+			"success": "boolean"
+		}]
+	}],
+	"totalTime": "number",
+	"totalSucceed": "number",
+	"totalFailure": "number"
+}
 ```
 ---
 

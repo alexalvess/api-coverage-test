@@ -2,6 +2,8 @@ import task = require('azure-pipelines-task-lib/task');
 import { CoverageModel } from './models/CoverageModel';
 import { EndpointModel } from './models/EndpointModel';
 import { InfoPathModel } from './models/InfoPathModel';
+import { WebhookModel } from './models/WebhookModel';
+import https = require('https');
 
 const request = require('request');
 const fs = require('fs');
@@ -14,15 +16,17 @@ async function run() {
         let swaggerJsonPath: string | undefined = task.getInput('SwaggerJsonPath', true);
         const testResultPath: string | undefined = task.getInput('TestsResultPath', true);
         const whereIsTheTest: string | undefined = task.getInput('WhereIsTheTest', true);
-        const webhook: string | undefined = task.getInput('Webhook', true);
+        const webhook: string | undefined = task.getInput('Webhook', false);
+        const buildNumber: string | undefined = task.getInput('BuildNumber', true);
+        const applicationName: string | undefined = task.getInput('ApplicationName', true);
 
-        // let apiUrl = 'https://aurora-project.azurewebsites.net/';
-        // let swaggerJsonPath = '/swagger/v1/swagger.json';
-        // const testResultPath = 'C:\\Users\\alexa\\Downloads\\junitReport(1).xml';
-        // let whereIsTheTest = 'testCase';
+        if(!apiUrl || !swaggerJsonPath || !testResultPath || !whereIsTheTest) {
+            task.setResult(task.TaskResult.Failed, 'Invalid values in fields.');
+            return;
+        }
 
-        apiUrl = apiUrl?.endsWith('/') ? apiUrl.slice(0, -1) : apiUrl;
-        swaggerJsonPath = swaggerJsonPath?.startsWith('/') ? swaggerJsonPath.substring(1) : swaggerJsonPath;
+        apiUrl = apiUrl.endsWith('/') ? apiUrl.slice(0, -1) : apiUrl;
+        swaggerJsonPath = swaggerJsonPath.startsWith('/') ? swaggerJsonPath.substring(1) : swaggerJsonPath;
 
         const url = `${apiUrl}/${swaggerJsonPath}`;
         
@@ -41,8 +45,14 @@ async function run() {
                         const testName = item.ATTR.name as string;
                         const time = item.ATTR.time as number;
                         const executeAt = item.ATTR.timestamp as Date;
+                        const success = (item.ATTR.failures as number) > 0 ? false : true;
+                        let message: string | undefined;
 
-                        EndpointModel.setSamePath(endpointsTested, testName, time, executeAt);
+                        if(!success) {
+                            message = item.testcase[0].failure[0].ATTR.message;
+                        }
+
+                        EndpointModel.setSamePath(endpointsTested, testName, time, executeAt, success, message);
                     });
                 } else {
                     result.testsuites.testsuite.map((item: any) => {
@@ -52,8 +62,15 @@ async function run() {
                             item.testcase.map((tc: any) => {
                                 const testName = tc.ATTR.classname as string;
                                 const time = tc.ATTR.time as number;
+                                let success: boolean = true;
+                                let message: string | undefined;
                                 
-                                EndpointModel.setSamePath(endpointsTested, testName, time, executeAt);
+                                if(tc.failure) {
+                                    success = false;
+                                    message = tc.failure[0].ATTR.message;
+                                }
+                                
+                                EndpointModel.setSamePath(endpointsTested, testName, time, executeAt, success, message);
                             });
                         }
                     });
@@ -97,6 +114,46 @@ async function run() {
 
                         coverage.coverLog();
                         coverage.uncoverLog();
+
+                        if(webhook) {
+                            const payload = new WebhookModel(
+                                applicationName ?? '',
+                                apiUrl ?? '', 
+                                buildNumber ?? '', 
+                                coverage.existed,
+                                coverage.tested,
+                                coverage.getCoverage(),
+                                endpointsExists,
+                                endpointsTested,
+                                coverage.uncover);
+                            
+                            const data = JSON.stringify(payload);
+
+                            Log('Payload generated:');
+                            console.log(data);
+                            Log(`Send to API: ${webhook}`);
+
+                            var request = https.request(
+                                webhook, 
+                                { 
+                                    method: 'POST',
+                                    headers: {
+                                        'Content-Type': 'application/json',
+                                        'Content-Length': data.length
+                                    }
+                                }, (response) => {
+                                    const statusCode = response.statusCode as number;
+                                    Log(`StatusCode of request: ${response.statusCode}`);
+
+                                    if(statusCode >= 200 && statusCode <= 299) {
+                                        Log('Request made successfully.');
+                                    } else {
+                                        Log('Error to make the request.')
+                                    }
+                                });
+
+                            request.write(data);
+                        }
                     }
                 });
             }

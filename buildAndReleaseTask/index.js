@@ -47,22 +47,31 @@ var task = require("azure-pipelines-task-lib/task");
 var CoverageModel_1 = require("./models/CoverageModel");
 var EndpointModel_1 = require("./models/EndpointModel");
 var InfoPathModel_1 = require("./models/InfoPathModel");
+var WebhookModel_1 = require("./models/WebhookModel");
+var https = require("https");
 var request = require('request');
 var fs = require('fs');
 var xml2js = require('xml2js');
 var parser = new xml2js.Parser({ attrkey: "ATTR" });
 function run() {
     return __awaiter(this, void 0, void 0, function () {
-        var apiUrl, swaggerJsonPath, testResultPath, whereIsTheTest_1, url_1, testResultsFile;
+        var apiUrl_1, swaggerJsonPath, testResultPath, whereIsTheTest_1, webhook_1, buildNumber_1, applicationName_1, url_1, testResultsFile;
         return __generator(this, function (_a) {
             try {
-                apiUrl = 'https://aurora-project.azurewebsites.net/';
-                swaggerJsonPath = '/swagger/v1/swagger.json';
-                testResultPath = 'C:\\Users\\alexa\\Downloads\\junitReport(1).xml';
-                whereIsTheTest_1 = 'testCase';
-                apiUrl = (apiUrl === null || apiUrl === void 0 ? void 0 : apiUrl.endsWith('/')) ? apiUrl.slice(0, -1) : apiUrl;
-                swaggerJsonPath = (swaggerJsonPath === null || swaggerJsonPath === void 0 ? void 0 : swaggerJsonPath.startsWith('/')) ? swaggerJsonPath.substring(1) : swaggerJsonPath;
-                url_1 = apiUrl + "/" + swaggerJsonPath;
+                apiUrl_1 = task.getInput('ApiUrl', true);
+                swaggerJsonPath = task.getInput('SwaggerJsonPath', true);
+                testResultPath = task.getInput('TestsResultPath', true);
+                whereIsTheTest_1 = task.getInput('WhereIsTheTest', true);
+                webhook_1 = task.getInput('Webhook', false);
+                buildNumber_1 = task.getInput('BuildNumber', true);
+                applicationName_1 = task.getInput('ApplicationName', true);
+                if (!apiUrl_1 || !swaggerJsonPath || !testResultPath || !whereIsTheTest_1) {
+                    task.setResult(task.TaskResult.Failed, 'Invalid values in fields.');
+                    return [2 /*return*/];
+                }
+                apiUrl_1 = apiUrl_1.endsWith('/') ? apiUrl_1.slice(0, -1) : apiUrl_1;
+                swaggerJsonPath = swaggerJsonPath.startsWith('/') ? swaggerJsonPath.substring(1) : swaggerJsonPath;
+                url_1 = apiUrl_1 + "/" + swaggerJsonPath;
                 Log("Reading test result file: " + testResultPath);
                 testResultsFile = fs.readFileSync(testResultPath, "utf8");
                 parser.parseString(testResultsFile, function (error, result) {
@@ -78,7 +87,12 @@ function run() {
                                 var testName = item.ATTR.name;
                                 var time = item.ATTR.time;
                                 var executeAt = item.ATTR.timestamp;
-                                EndpointModel_1.EndpointModel.setSamePath(endpointsTested_1, testName, time, executeAt);
+                                var success = item.ATTR.failures > 0 ? false : true;
+                                var message;
+                                if (!success) {
+                                    message = item.testcase[0].failure[0].ATTR.message;
+                                }
+                                EndpointModel_1.EndpointModel.setSamePath(endpointsTested_1, testName, time, executeAt, success, message);
                             });
                         }
                         else {
@@ -88,7 +102,13 @@ function run() {
                                     item.testcase.map(function (tc) {
                                         var testName = tc.ATTR.classname;
                                         var time = tc.ATTR.time;
-                                        EndpointModel_1.EndpointModel.setSamePath(endpointsTested_1, testName, time, executeAt_1);
+                                        var success = true;
+                                        var message;
+                                        if (tc.failure) {
+                                            success = false;
+                                            message = tc.failure[0].ATTR.message;
+                                        }
+                                        EndpointModel_1.EndpointModel.setSamePath(endpointsTested_1, testName, time, executeAt_1, success, message);
                                     });
                                 }
                             });
@@ -126,6 +146,30 @@ function run() {
                                 });
                                 coverage_1.coverLog();
                                 coverage_1.uncoverLog();
+                                if (webhook_1) {
+                                    var payload = new WebhookModel_1.WebhookModel(applicationName_1 !== null && applicationName_1 !== void 0 ? applicationName_1 : '', apiUrl_1 !== null && apiUrl_1 !== void 0 ? apiUrl_1 : '', buildNumber_1 !== null && buildNumber_1 !== void 0 ? buildNumber_1 : '', coverage_1.existed, coverage_1.tested, coverage_1.getCoverage(), endpointsExists_1, endpointsTested_1, coverage_1.uncover);
+                                    var data = JSON.stringify(payload);
+                                    Log('Payload generated:');
+                                    console.log(data);
+                                    Log("Send to API: " + webhook_1);
+                                    var request = https.request(webhook_1, {
+                                        method: 'POST',
+                                        headers: {
+                                            'Content-Type': 'application/json',
+                                            'Content-Length': data.length
+                                        }
+                                    }, function (response) {
+                                        var statusCode = response.statusCode;
+                                        Log("StatusCode of request: " + response.statusCode);
+                                        if (statusCode >= 200 && statusCode <= 299) {
+                                            Log('Request made successfully.');
+                                        }
+                                        else {
+                                            Log('Error to make the request.');
+                                        }
+                                    });
+                                    request.write(data);
+                                }
                             }
                         });
                     }
