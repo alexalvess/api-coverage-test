@@ -80,7 +80,7 @@
             "label": "Build Number",
             "defaultValue": "$(Build.BuildNumber)",
             "required": true,
-            "visibleRule": "false == true"
+            "visibleRule": "Webhook == true"
         }
     ],
     "execution": {
