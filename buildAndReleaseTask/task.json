@@ -80,7 +80,7 @@
             "label": "Build Number",
             "defaultValue": "$(Build.BuildNumber)",
             "required": true,
-            "visibleRule": "false"
+            "visibleRule": "false = true"
         }
     ],
     "execution": {
