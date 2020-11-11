@@ -1,5 +1,5 @@
 import task = require('azure-pipelines-task-lib/task');
-import https = require('https');
+// import httpsRequest = require('https');
 import { CoverageModel } from './models/CoverageModel';
 import { EndpointModel } from './models/EndpointModel';
 import { InfoPathModel } from './models/InfoPathModel';
@@ -128,26 +128,26 @@ async function run() {
                             console.log(data);
                             Log(`Send to API: ${webhook}`);
 
-                            var rq = https.request(
-                                webhook, 
-                                { 
-                                    method: 'POST',
-                                    headers: {
-                                        'Content-Type': 'application/json',
-                                        'Content-Length': data.length
-                                    }
-                                }, (response) => {
-                                    const statusCode = response.statusCode as number;
-                                    Log(`StatusCode of request: ${response.statusCode}`);
+                            // var rq = https.request(
+                            //     webhook, 
+                            //     { 
+                            //         method: 'POST',
+                            //         headers: {
+                            //             'Content-Type': 'application/json',
+                            //             'Content-Length': data.length
+                            //         }
+                            //     }, (response) => {
+                            //         const statusCode = response.statusCode as number;
+                            //         Log(`StatusCode of request: ${response.statusCode}`);
 
-                                    if(statusCode >= 200 && statusCode <= 299) {
-                                        Log('Request made successfully.');
-                                    } else {
-                                        Log('Error to make the request.')
-                                    }
-                                });
+                            //         if(statusCode >= 200 && statusCode <= 299) {
+                            //             Log('Request made successfully.');
+                            //         } else {
+                            //             Log('Error to make the request.')
+                            //         }
+                            //     });
 
-                            rq.write(data);
+                            // rq.write(data);
                         }
                     }
                 });
