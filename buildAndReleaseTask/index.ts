@@ -10,15 +10,16 @@ const parser = new xml2js.Parser({ attrkey: "ATTR" });
 
 async function run() {
     try {
-        // let apiUrl: string | undefined = task.getInput('ApiUrl', true);
-        // let swaggerJsonPath: string | undefined = task.getInput('SwaggerJsonPath', true);
-        // const testResultPath: string | undefined = task.getInput('TestsResultPath', true);
-        // const whereIsTheTest: string | undefined = task.getInput('WhereIsTheTest', true);
+        let apiUrl: string | undefined = task.getInput('ApiUrl', true);
+        let swaggerJsonPath: string | undefined = task.getInput('SwaggerJsonPath', true);
+        const testResultPath: string | undefined = task.getInput('TestsResultPath', true);
+        const whereIsTheTest: string | undefined = task.getInput('WhereIsTheTest', true);
+        const webhook: string | undefined = task.getInput('Webhook', true);
 
-        let apiUrl = 'https://aurora-project.azurewebsites.net/';
-        let swaggerJsonPath = '/swagger/v1/swagger.json';
-        const testResultPath = 'C:\\Users\\alexa\\Downloads\\junitReport(1).xml';
-        let whereIsTheTest = 'testCase';
+        // let apiUrl = 'https://aurora-project.azurewebsites.net/';
+        // let swaggerJsonPath = '/swagger/v1/swagger.json';
+        // const testResultPath = 'C:\\Users\\alexa\\Downloads\\junitReport(1).xml';
+        // let whereIsTheTest = 'testCase';
 
         apiUrl = apiUrl?.endsWith('/') ? apiUrl.slice(0, -1) : apiUrl;
         swaggerJsonPath = swaggerJsonPath?.startsWith('/') ? swaggerJsonPath.substring(1) : swaggerJsonPath;

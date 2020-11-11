@@ -15,18 +15,6 @@
     "instanceNameFormat": "API Coverage Test",
     "inputs": [
         {
-            "name": "WhereIsTheTest",
-            "type": "radio",
-            "label": "Where is the tests name",
-            "required": true,
-            "defaultValue": "testSuite",
-            "helpMarkDown": "Choose which tag shows the details of the test (path and verb) in the generated XML. In POSTMAN it is generated in Test Suite, and in applications made in JS it is generated in Test Case.",
-            "options": {
-                "testSuite": "Test Suite",
-                "testCase": "Test Case"
-            }
-        },
-        {
             "name": "ApiUrl",
             "type": "string",
             "label": "Api url",
@@ -49,6 +37,27 @@
             "defaultValue": "$(System.DefaultWorkingDirectory)\\Results\\junitReport.xml",
             "required": true,
             "helpMarkDown": "Output path where the test result are available."
+        },
+        {
+            "name": "WhereIsTheTest",
+            "type": "radio",
+            "label": "Where is the tests name",
+            "required": true,
+            "defaultValue": "testSuite",
+            "helpMarkDown": "Choose which tag shows the details of the test (path and verb) in the generated XML. In POSTMAN it is generated in Test Suite, and in applications made in JS it is generated in Test Case.",
+            "options": {
+                "testSuite": "Test Suite",
+                "testCase": "Test Case"
+            }
+        },
+        {
+            "name": "Webhook",
+            "type": "string",
+            "label": "Webhook",
+            "required": false,
+            "defaultValue": "",
+            "helpMarkDown": "Inform the endpoint that receive a payload's coverage result.",
+            "groupName": "advanced"
         }
     ],
     "execution": {
