@@ -1,9 +1,9 @@
 import task = require('azure-pipelines-task-lib/task');
+import https = require('https');
 import { CoverageModel } from './models/CoverageModel';
 import { EndpointModel } from './models/EndpointModel';
 import { InfoPathModel } from './models/InfoPathModel';
 import { WebhookModel } from './models/WebhookModel';
-import https = require('https');
 
 const request = require('request');
 const fs = require('fs');
@@ -128,7 +128,7 @@ async function run() {
                             console.log(data);
                             Log(`Send to API: ${webhook}`);
 
-                            var request = https.request(
+                            var rq = https.request(
                                 webhook, 
                                 { 
                                     method: 'POST',
@@ -147,7 +147,7 @@ async function run() {
                                     }
                                 });
 
-                            request.write(data);
+                            rq.write(data);
                         }
                     }
                 });

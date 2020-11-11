@@ -44,11 +44,11 @@ var __spreadArrays = (this && this.__spreadArrays) || function () {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 var task = require("azure-pipelines-task-lib/task");
+var https = require("https");
 var CoverageModel_1 = require("./models/CoverageModel");
 var EndpointModel_1 = require("./models/EndpointModel");
 var InfoPathModel_1 = require("./models/InfoPathModel");
 var WebhookModel_1 = require("./models/WebhookModel");
-var https = require("https");
 var request = require('request');
 var fs = require('fs');
 var xml2js = require('xml2js');
@@ -65,12 +65,8 @@ function run() {
                 webhook_1 = task.getInput('Webhook', false);
                 buildNumber_1 = task.getInput('BuildNumber', true);
                 applicationName_1 = task.getInput('ApplicationName', true);
-                if (!apiUrl_1 || !swaggerJsonPath || !testResultPath || !whereIsTheTest_1) {
-                    task.setResult(task.TaskResult.Failed, 'Invalid values in fields.');
-                    return [2 /*return*/];
-                }
-                apiUrl_1 = apiUrl_1.endsWith('/') ? apiUrl_1.slice(0, -1) : apiUrl_1;
-                swaggerJsonPath = swaggerJsonPath.startsWith('/') ? swaggerJsonPath.substring(1) : swaggerJsonPath;
+                apiUrl_1 = (apiUrl_1 === null || apiUrl_1 === void 0 ? void 0 : apiUrl_1.endsWith('/')) ? apiUrl_1.slice(0, -1) : apiUrl_1;
+                swaggerJsonPath = (swaggerJsonPath === null || swaggerJsonPath === void 0 ? void 0 : swaggerJsonPath.startsWith('/')) ? swaggerJsonPath.substring(1) : swaggerJsonPath;
                 url_1 = apiUrl_1 + "/" + swaggerJsonPath;
                 Log("Reading test result file: " + testResultPath);
                 testResultsFile = fs.readFileSync(testResultPath, "utf8");
@@ -152,7 +148,7 @@ function run() {
                                     Log('Payload generated:');
                                     console.log(data);
                                     Log("Send to API: " + webhook_1);
-                                    var request = https.request(webhook_1, {
+                                    var rq = https.request(webhook_1, {
                                         method: 'POST',
                                         headers: {
                                             'Content-Type': 'application/json',
@@ -168,7 +164,7 @@ function run() {
                                             Log('Error to make the request.');
                                         }
                                     });
-                                    request.write(data);
+                                    rq.write(data);
                                 }
                             }
                         });
