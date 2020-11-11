@@ -20,13 +20,8 @@ async function run() {
         const buildNumber: string | undefined = task.getInput('BuildNumber', true);
         const applicationName: string | undefined = task.getInput('ApplicationName', true);
 
-        if(!apiUrl || !swaggerJsonPath || !testResultPath || !whereIsTheTest) {
-            task.setResult(task.TaskResult.Failed, 'Invalid values in fields.');
-            return;
-        }
-
-        apiUrl = apiUrl.endsWith('/') ? apiUrl.slice(0, -1) : apiUrl;
-        swaggerJsonPath = swaggerJsonPath.startsWith('/') ? swaggerJsonPath.substring(1) : swaggerJsonPath;
+        apiUrl = apiUrl?.endsWith('/') ? apiUrl.slice(0, -1) : apiUrl;
+        swaggerJsonPath = swaggerJsonPath?.startsWith('/') ? swaggerJsonPath.substring(1) : swaggerJsonPath;
 
         const url = `${apiUrl}/${swaggerJsonPath}`;
         

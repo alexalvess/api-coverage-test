@@ -66,6 +66,13 @@
             }
         },
         {
+            "name": "BuildNumber",
+            "type": "string",
+            "label": "Build Number",
+            "defaultValue": "$(Build.BuildNumber)",
+            "required": true
+        },
+        {
             "name": "Webhook",
             "type": "string",
             "label": "Webhook",
@@ -73,13 +80,6 @@
             "defaultValue": "",
             "helpMarkDown": "Inform the endpoint that receive a payload's coverage result.",
             "groupName": "WebhookGroup"
-        },
-        {
-            "name": "BuildNumber",
-            "type": "string",
-            "label": "Build Number",
-            "defaultValue": "$(Build.BuildNumber)",
-            "required": true
         }
     ],
     "execution": {
