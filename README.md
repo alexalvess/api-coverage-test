@@ -8,4 +8,4 @@ According to the JSON file of Swagger of API and the JUnit file result test, it 
 
 ## How to use
 This is the window of Custom Task in a Pipeline:
-![Flow](images/buidpipeline.png)
+![Flow](https://raw.githubusercontent.com/alexalvess/api-coverage-test/master/images/buidpipeline.png)
