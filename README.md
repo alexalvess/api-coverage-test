@@ -1,5 +1,7 @@
-# Coverage API Integration Test
+# Coverage API Integration Test for Azure DevOps Pipelines
 
-Task that generate a coverage percent, according the endpoints tested.
+This project is a custom task that you can include in your pipeline on Azure DevOps.
+According to the JSON file of Swagger of API and the JUnit file result test, it is made a from-to both files and generates a tests coverage percent.
 
-## How to use
+## The flow
+![Flow](./images/flow.png)
