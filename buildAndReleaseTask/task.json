@@ -1,0 +1,59 @@
+{
+    "$schema": "https://raw.githubusercontent.com/Microsoft/azure-pipelines-task-lib/master/tasks.schema.json",
+    "id": "702d7430-c3a9-422a-87f2-569ed16ba6be",
+    "name": "APICoverageTest",
+    "friendlyName": "API Coverage Test",
+    "description": "Test coverage according to tested endpoints and what's in the swagger. Only support for JUnit test format.",
+    "helpMarkDown": "",
+    "category": "Test",
+    "author": "Alex Alves",
+    "version": {
+        "Major": 0,
+        "Minor": 1,
+        "Patch": 11
+    },
+    "instanceNameFormat": "API Coverage Test",
+    "inputs": [
+        {
+            "name": "WhereIsTheTest",
+            "type": "radio",
+            "label": "Where is the tests name",
+            "required": true,
+            "defaultValue": "testSuite",
+            "helpMarkDown": "Choose which tag shows the details of the test (path and verb) in the generated XML. In POSTMAN it is generated in Test Suite, and in applications made in JS it is generated in Test Case.",
+            "options": {
+                "testSuite": "Test Suite",
+                "testCase": "Test Case"
+            }
+        },
+        {
+            "name": "ApiUrl",
+            "type": "string",
+            "label": "Api url",
+            "defaultValue": "",
+            "required": true,
+            "helpMarkDown": "For example: https://{url}/"
+        },
+        {
+            "name": "SwaggerJsonPath",
+            "type": "string",
+            "label": "PATH to JSON of Swagger",
+            "defaultValue": "",
+            "required": true,
+            "helpMarkDown": "For example: swagger/{version}/swagger.json"
+        },
+        {
+            "name": "TestsResultPath",
+            "type": "string",
+            "label": "Tests Result Path",
+            "defaultValue": "$(System.DefaultWorkingDirectory)\\Results\\junitReport.xml",
+            "required": true,
+            "helpMarkDown": "Output path where the test result are available."
+        }
+    ],
+    "execution": {
+        "Node10": {
+            "target": "index.js"
+        }
+    }
+}

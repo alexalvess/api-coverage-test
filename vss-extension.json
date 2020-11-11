@@ -1,0 +1,56 @@
+{
+    "manifestVersion": 1,
+    "id": "task-702d7430-c3a9-422a-87f2-569ed16ba6be",
+    "name": "Coverage API Test",
+    "version": "0.0.16",
+    "publisher": "AlexAlves",
+    "targets": [
+        {
+            "id": "Microsoft.VisualStudio.Services"
+        }
+    ],    
+    "description": "Tools for generate the coverage by test result of a integration test.",
+    "categories": [
+        "Azure Pipelines"
+    ],
+    "branding": {
+        "color": "rgb(0, 154, 142)",
+        "theme": "light"
+    },
+    "tags": [
+        "test",
+        "integration test",
+        "coverage",
+        "swagger api",
+        "api"
+    ],
+    "content": {
+        "details": {
+            "path": "README.md"
+        }
+    },
+    "icons": {
+        "default": "images/extensionicon.png"
+    },
+    "files": [
+        {
+            "path": "buildAndReleaseTask"
+        }
+    ],
+    "repository": {
+        "type": "git",
+        "uri": "https://github.com/alexalvess/coverage-integration-test"
+    },
+    "contributions": [
+        {
+            "id": "custom-task-coverage-api-test",
+            "type": "ms.vss-distributed-task.task",
+            "targets": [
+                "ms.vss-distributed-task.tasks"
+            ],
+            "properties": {
+                "name": "buildAndReleaseTask"
+            }
+        }
+    ]
+}
