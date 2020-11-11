@@ -36,7 +36,7 @@ The payload model that will be generated is:
         "createAt": "DateTime",
         "buildNumber": "String",
         "totalEndpointsFound": "Number",
-        "totalEndpointsTested": "Number"
+        "totalEndpointsTested": "Number",
         "coverage": "Number",
         "totalTime": "Number",
         "totalSucceed": "Number",
@@ -47,7 +47,7 @@ The payload model that will be generated is:
                 "infoPath": [
                     {
                         "verb": "String",
-                        "executeAt": "DateTime"
+                        "executeAt": "DateTime",
                         "success": "Boolean",
                         "time": "Number",
                         "failureMessage": "String"
@@ -60,8 +60,8 @@ The payload model that will be generated is:
 ```
 ---
 
-### We are online 🚀!
+## We are online 🚀!
 See this extension in [Visual Studio Market Place](https://marketplace.visualstudio.com/items?itemName=AlexAlves.task-702d7430-c3a9-422a-87f2-569ed16ba6be)
 
-### About ℹ:
+## About ℹ:
 This custom task was developed by [Alex Alves](https://www.linkedin.com/in/alexalvess/) and encouraged by [XP Inc.](https://www.xpi.com.br/)
