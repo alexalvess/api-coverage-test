@@ -44,7 +44,7 @@ var __spreadArrays = (this && this.__spreadArrays) || function () {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 var task = require("azure-pipelines-task-lib/task");
-var https = require("https");
+// import httpsRequest = require('https');
 var CoverageModel_1 = require("./models/CoverageModel");
 var EndpointModel_1 = require("./models/EndpointModel");
 var InfoPathModel_1 = require("./models/InfoPathModel");
@@ -148,23 +148,24 @@ function run() {
                                     Log('Payload generated:');
                                     console.log(data);
                                     Log("Send to API: " + webhook_1);
-                                    var rq = https.request(webhook_1, {
-                                        method: 'POST',
-                                        headers: {
-                                            'Content-Type': 'application/json',
-                                            'Content-Length': data.length
-                                        }
-                                    }, function (response) {
-                                        var statusCode = response.statusCode;
-                                        Log("StatusCode of request: " + response.statusCode);
-                                        if (statusCode >= 200 && statusCode <= 299) {
-                                            Log('Request made successfully.');
-                                        }
-                                        else {
-                                            Log('Error to make the request.');
-                                        }
-                                    });
-                                    rq.write(data);
+                                    // var rq = https.request(
+                                    //     webhook, 
+                                    //     { 
+                                    //         method: 'POST',
+                                    //         headers: {
+                                    //             'Content-Type': 'application/json',
+                                    //             'Content-Length': data.length
+                                    //         }
+                                    //     }, (response) => {
+                                    //         const statusCode = response.statusCode as number;
+                                    //         Log(`StatusCode of request: ${response.statusCode}`);
+                                    //         if(statusCode >= 200 && statusCode <= 299) {
+                                    //             Log('Request made successfully.');
+                                    //         } else {
+                                    //             Log('Error to make the request.')
+                                    //         }
+                                    //     });
+                                    // rq.write(data);
                                 }
                             }
                         });
