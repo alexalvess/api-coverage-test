@@ -15,7 +15,7 @@
     "instanceNameFormat": "API Coverage Test",
     "groups": [
         {
-            "name": "Webhook",
+            "name": "WebhookGroup",
             "displayName": "Webhook",
             "isExpanded": true
         }
@@ -64,7 +64,7 @@
             "required": false,
             "defaultValue": "",
             "helpMarkDown": "Inform the endpoint that receive a payload's coverage result.",
-            "groupName": "Webhook"
+            "groupName": "WebhookGroup"
         }
     ],
     "execution": {
