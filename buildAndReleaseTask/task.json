@@ -10,7 +10,7 @@
     "version": {
         "Major": 0,
         "Minor": 1,
-        "Patch": 13
+        "Patch": 14
     },
     "instanceNameFormat": "API Coverage Test",
     "groups": [
@@ -79,8 +79,7 @@
             "type": "string",
             "label": "Build Number",
             "defaultValue": "$(Build.BuildNumber)",
-            "required": true,
-            "visibleRule": "Webhook == true"
+            "required": true
         }
     ],
     "execution": {
