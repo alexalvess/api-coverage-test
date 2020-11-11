@@ -4,7 +4,7 @@ This project is a custom task that you can include in your pipeline on Azure Dev
 According to the JSON file of Swagger of API and the JUnit file result test, it is made a from-to both files and generates a tests coverage percent.
 
 ## The flow
-![Flow](images/flow.png)
+![Flow](https://raw.githubusercontent.com/alexalvess/api-coverage-test/master/images/flow.png)
 
 ## How to use
 This is the window of Custom Task in a Pipeline:
