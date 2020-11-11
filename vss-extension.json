@@ -39,7 +39,7 @@
     ],
     "repository": {
         "type": "git",
-        "uri": "https://github.com/alexalvess/coverage-integration-test"
+        "uri": "https://github.com/alexalvess/api-coverage-test"
     },
     "contributions": [
         {
