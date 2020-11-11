@@ -35,8 +35,18 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
+var __spreadArrays = (this && this.__spreadArrays) || function () {
+    for (var s = 0, i = 0, il = arguments.length; i < il; i++) s += arguments[i].length;
+    for (var r = Array(s), k = 0, i = 0; i < il; i++)
+        for (var a = arguments[i], j = 0, jl = a.length; j < jl; j++, k++)
+            r[k] = a[j];
+    return r;
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 var task = require("azure-pipelines-task-lib/task");
+var CoverageModel_1 = require("./models/CoverageModel");
+var EndpointModel_1 = require("./models/EndpointModel");
+var InfoPathModel_1 = require("./models/InfoPathModel");
 var request = require('request');
 var fs = require('fs');
 var xml2js = require('xml2js');
@@ -46,10 +56,10 @@ function run() {
         var apiUrl, swaggerJsonPath, testResultPath, whereIsTheTest_1, url_1, testResultsFile;
         return __generator(this, function (_a) {
             try {
-                apiUrl = task.getInput('ApiUrl', true);
-                swaggerJsonPath = task.getInput('SwaggerJsonPath', true);
-                testResultPath = task.getInput('TestsResultPath', true);
-                whereIsTheTest_1 = task.getInput('WhereIsTheTest', true);
+                apiUrl = 'https://aurora-project.azurewebsites.net/';
+                swaggerJsonPath = '/swagger/v1/swagger.json';
+                testResultPath = 'C:\\Users\\alexa\\Downloads\\junitReport(1).xml';
+                whereIsTheTest_1 = 'testCase';
                 apiUrl = (apiUrl === null || apiUrl === void 0 ? void 0 : apiUrl.endsWith('/')) ? apiUrl.slice(0, -1) : apiUrl;
                 swaggerJsonPath = (swaggerJsonPath === null || swaggerJsonPath === void 0 ? void 0 : swaggerJsonPath.startsWith('/')) ? swaggerJsonPath.substring(1) : swaggerJsonPath;
                 url_1 = apiUrl + "/" + swaggerJsonPath;
@@ -60,100 +70,62 @@ function run() {
                         task.setResult(task.TaskResult.Failed, JSON.stringify(error));
                     }
                     else {
-                        var endpointsInFile_1 = [];
+                        var endpointsTested_1 = new Array();
+                        var endpointsExists_1 = new Array();
+                        var coverage_1 = new CoverageModel_1.CoverageModel();
                         if (whereIsTheTest_1 === 'testSuite') {
-                            endpointsInFile_1 = result.testsuites.testsuite.map(function (item) {
-                                var value = item.ATTR.name.split(' ');
-                                return {
-                                    path: value[1],
-                                    verb: value[0].toUpperCase()
-                                };
+                            result.testsuites.testsuite.map(function (item) {
+                                var testName = item.ATTR.name;
+                                var time = item.ATTR.time;
+                                var executeAt = item.ATTR.timestamp;
+                                EndpointModel_1.EndpointModel.setSamePath(endpointsTested_1, testName, time, executeAt);
                             });
                         }
                         else {
                             result.testsuites.testsuite.map(function (item) {
                                 if (item.testcase) {
+                                    var executeAt_1 = item.ATTR.timestamp;
                                     item.testcase.map(function (tc) {
-                                        var infos = tc.ATTR.classname.toString().split(' ');
-                                        endpointsInFile_1.push({
-                                            path: infos[infos.length - 1],
-                                            verb: infos[infos.length - 2].toUpperCase()
-                                        });
+                                        var testName = tc.ATTR.classname;
+                                        var time = tc.ATTR.time;
+                                        EndpointModel_1.EndpointModel.setSamePath(endpointsTested_1, testName, time, executeAt_1);
                                     });
                                 }
                             });
                         }
-                        var endpointsTested_1 = [];
-                        endpointsInFile_1.forEach(function (element) {
-                            var _a;
-                            var endpoint = endpointsTested_1.find(function (f) { return f.path === element.path; });
-                            if (endpoint) {
-                                (_a = endpointsTested_1.find(function (f) { return f.path === element.path; })) === null || _a === void 0 ? void 0 : _a.verbs.push(element.verb);
-                            }
-                            else {
-                                endpointsTested_1.push({
-                                    path: element.path,
-                                    verbs: [element.verb]
-                                });
-                            }
-                        });
-                        Log("Endpoints tested: " + endpointsTested_1.reduce(function (acumulator, currenct) { return acumulator + currenct.verbs.length; }, 0));
-                        endpointsTested_1.forEach(function (element) {
-                            console.log("Path: " + element.path + " | Verbs: " + element.verbs);
-                        });
+                        coverage_1.tested = EndpointModel_1.EndpointModel.log('Endpoints tested', endpointsTested_1);
                         Log("Reading Swagger of API: " + url_1);
-                        Log("Get endpoints of API");
                         request(url_1, { json: true }, function (error, response, body) {
                             if (error) {
                                 task.setResult(task.TaskResult.Failed, JSON.stringify(error));
                             }
                             else if (!error && response.statusCode == 200) {
-                                var endpointsExists_1 = [];
                                 Object.keys(body.paths).forEach(function (element) {
-                                    endpointsExists_1.push({
-                                        path: element,
-                                        verbs: Object.keys(body.paths[element]).map(function (el) { return el.toUpperCase(); })
-                                    });
+                                    var endpoint = new EndpointModel_1.EndpointModel();
+                                    endpoint.path = element;
+                                    endpoint.infoPath = Object.keys(body.paths[element]).map(function (el) { return new InfoPathModel_1.InfoPathModel(el.toUpperCase()); });
+                                    endpointsExists_1.push(endpoint);
                                 });
-                                Log("Endpoints found: " + endpointsExists_1.reduce(function (acumulator, currenct) { return acumulator + currenct.verbs.length; }, 0));
-                                endpointsExists_1.forEach(function (element) {
-                                    console.log("Path: " + element.path + " | Verbs: " + element.verbs);
-                                });
-                                var totalEndpoints_1 = 0;
-                                endpointsExists_1.forEach(function (el) {
-                                    totalEndpoints_1 += el.verbs.length;
-                                });
-                                var uncoverageEndpoints = endpointsExists_1.map(function (f) {
-                                    var endpoint = endpointsTested_1.find(function (fi) { return fi.path == f.path; });
-                                    if (endpoint == undefined) {
-                                        return f;
-                                    }
-                                    else {
-                                        var verbsUncoverage = f.verbs.filter(function (f) { return !endpoint.verbs.includes(f); });
-                                        if (verbsUncoverage && verbsUncoverage.length > 0) {
-                                            return {
-                                                path: f.path,
-                                                verbs: verbsUncoverage
-                                            };
+                                coverage_1.existed = EndpointModel_1.EndpointModel.log('Endpoints found', endpointsExists_1);
+                                endpointsExists_1.forEach(function (item) {
+                                    var endpoint = endpointsTested_1.find(function (fi) { return fi.path == item.path; });
+                                    if (endpoint) {
+                                        var verbsInExisted = item.infoPath.map(function (m) { return m.verb; });
+                                        var verbsInTested_1 = endpoint.infoPath.map(function (m) { return m.verb; });
+                                        var verbsUncover = verbsInExisted.filter(function (f) { return !verbsInTested_1.includes(f); });
+                                        if (verbsUncover && verbsUncover.length > 0) {
+                                            endpoint = new EndpointModel_1.EndpointModel();
+                                            endpoint.path = item.path;
+                                            endpoint.infoPath = __spreadArrays(verbsUncover.map(function (m) { return new InfoPathModel_1.InfoPathModel(m); }));
+                                            coverage_1.uncover.push(endpoint);
                                         }
                                     }
-                                });
-                                var cover_1 = 0;
-                                endpointsTested_1.forEach(function (item) { return cover_1 += item.verbs.length; });
-                                var uncover_1 = 0;
-                                uncoverageEndpoints.forEach(function (item) {
-                                    if (item) {
-                                        uncover_1 += item.verbs.length;
+                                    else {
+                                        coverage_1.uncover.push(item);
                                     }
                                 });
-                                var coverage = (cover_1 * 100) / totalEndpoints_1;
-                                Log("Coverage: " + coverage + " %");
-                                Log("Uncoverage endpoints: " + uncover_1);
-                                uncoverageEndpoints.forEach(function (item) {
-                                    if (item) {
-                                        console.log("Path: " + item.path + " | Verbs: " + item.verbs);
-                                    }
-                                });
+                                coverage_1.coverLog();
+                                coverage_1.uncoverLog();
                             }
                         });
                     }

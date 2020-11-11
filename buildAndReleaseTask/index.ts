@@ -1,4 +1,7 @@
 import task = require('azure-pipelines-task-lib/task');
+import { CoverageModel } from './models/CoverageModel';
+import { EndpointModel } from './models/EndpointModel';
+import { InfoPathModel } from './models/InfoPathModel';
 
 const request = require('request');
 const fs = require('fs');
@@ -7,10 +10,15 @@ const parser = new xml2js.Parser({ attrkey: "ATTR" });
 
 async function run() {
     try {
-        let apiUrl: string | undefined = task.getInput('ApiUrl', true);
-        let swaggerJsonPath: string | undefined = task.getInput('SwaggerJsonPath', true);
-        const testResultPath: string | undefined = task.getInput('TestsResultPath', true);
-        const whereIsTheTest: string | undefined = task.getInput('WhereIsTheTest', true);
+        // let apiUrl: string | undefined = task.getInput('ApiUrl', true);
+        // let swaggerJsonPath: string | undefined = task.getInput('SwaggerJsonPath', true);
+        // const testResultPath: string | undefined = task.getInput('TestsResultPath', true);
+        // const whereIsTheTest: string | undefined = task.getInput('WhereIsTheTest', true);
+
+        let apiUrl = 'https://aurora-project.azurewebsites.net/';
+        let swaggerJsonPath = '/swagger/v1/swagger.json';
+        const testResultPath = 'C:\\Users\\alexa\\Downloads\\junitReport(1).xml';
+        let whereIsTheTest = 'testCase';
 
         apiUrl = apiUrl?.endsWith('/') ? apiUrl.slice(0, -1) : apiUrl;
         swaggerJsonPath = swaggerJsonPath?.startsWith('/') ? swaggerJsonPath.substring(1) : swaggerJsonPath;
@@ -23,111 +31,71 @@ async function run() {
             if(error) {
                 task.setResult(task.TaskResult.Failed, JSON.stringify(error));
             } else {
-                let endpointsInFile: Array<{path: string, verb: string}> = [];
+                let endpointsTested: Array<EndpointModel> = new Array<EndpointModel>();
+                let endpointsExists: Array<EndpointModel> = new Array<EndpointModel>();
+                let coverage: CoverageModel = new CoverageModel();
 
                 if(whereIsTheTest === 'testSuite') {
-                    endpointsInFile = result.testsuites.testsuite.map((item: any) => {
-                        const value = (item.ATTR.name as string).split(' ');
-    
-                        return {
-                            path: value[1],
-                            verb: value[0].toUpperCase()
-                        };
+                    result.testsuites.testsuite.map((item: any) => {
+                        const testName = item.ATTR.name as string;
+                        const time = item.ATTR.time as number;
+                        const executeAt = item.ATTR.timestamp as Date;
+
+                        EndpointModel.setSamePath(endpointsTested, testName, time, executeAt);
                     });
                 } else {
                     result.testsuites.testsuite.map((item: any) => {
                         if(item.testcase) {
+                            const executeAt = item.ATTR.timestamp as Date;
+
                             item.testcase.map((tc: any) => {
-                                const infos: string[] = tc.ATTR.classname.toString().split(' ');
-                                endpointsInFile.push({
-                                    path: infos[infos.length - 1],
-                                    verb: infos[infos.length - 2].toUpperCase()
-                                });
+                                const testName = tc.ATTR.classname as string;
+                                const time = tc.ATTR.time as number;
+                                
+                                EndpointModel.setSamePath(endpointsTested, testName, time, executeAt);
                             });
                         }
                     });
                 }
 
-                let endpointsTested: Array<{path: string, verbs: string[]}> = []
-
-                endpointsInFile.forEach(element => {
-                    const endpoint = endpointsTested.find(f => f.path === element.path)
-                    if(endpoint) {
-                        endpointsTested.find(f => f.path === element.path)?.verbs.push(element.verb);
-                    } else {
-                        endpointsTested.push({
-                            path: element.path,
-                            verbs: [element.verb]
-                        });
-                    }
-                });
-
-                Log(`Endpoints tested: ${endpointsTested.reduce((acumulator, currenct) => acumulator + currenct.verbs.length, 0)}`);
-                endpointsTested.forEach((element) => {
-                    console.log(`Path: ${element.path} | Verbs: ${element.verbs}`)
-                });
+                coverage.tested = EndpointModel.log('Endpoints tested', endpointsTested);
 
                 Log(`Reading Swagger of API: ${url}`);
-                Log(`Get endpoints of API`);
                 request(url, { json: true }, (error: any, response: any, body: any) => {
                     if(error) {
                         task.setResult(task.TaskResult.Failed, JSON.stringify(error));
                     } else if(!error && response.statusCode == 200) {
-                        const endpointsExists: Array<{path: string, verbs: string[]}> = [];
-
                         Object.keys(body.paths).forEach(element => {
-                            endpointsExists.push({
-                                path: element,
-                                verbs: Object.keys(body.paths[element]).map(el => el.toUpperCase())
-                            });
+                            let endpoint = new EndpointModel();
+                            endpoint.path = element;
+                            endpoint.infoPath = Object.keys(body.paths[element]).map(el => new InfoPathModel(el.toUpperCase()))
+                            endpointsExists.push(endpoint);
                         });
 
-                        Log(`Endpoints found: ${endpointsExists.reduce((acumulator, currenct) => acumulator + currenct.verbs.length, 0)}`)
-                        endpointsExists.forEach(element => {
-                            console.log(`Path: ${element.path} | Verbs: ${element.verbs}`);
-                        });
+                        coverage.existed = EndpointModel.log('Endpoints found', endpointsExists);
 
-                        let totalEndpoints = 0;
-                        endpointsExists.forEach(el => {
-                            totalEndpoints += el.verbs.length;
-                        });
-
-                        const uncoverageEndpoints = endpointsExists.map(f => {
-                            const endpoint = endpointsTested.find(fi => fi.path == f.path);
+                        endpointsExists.forEach((item: EndpointModel) => {
+                            let endpoint = endpointsTested.find(fi => fi.path == item.path);
                             
-                            if(endpoint == undefined) {
-                                return f;
-                            } else {
-                                const verbsUncoverage = f.verbs.filter(f => !endpoint.verbs.includes(f));
+                            if(endpoint) {
+                                const verbsInExisted = item.infoPath.map(m => m.verb);
+                                const verbsInTested = endpoint.infoPath.map(m => m.verb);
+                                
+                                const verbsUncover = verbsInExisted.filter(f => !verbsInTested.includes(f));
 
-                                if(verbsUncoverage && verbsUncoverage.length > 0) {
-                                    return {
-                                        path: f.path,
-                                        verbs: verbsUncoverage
-                                    };
+                                if(verbsUncover && verbsUncover.length > 0) {
+                                    endpoint = new EndpointModel();
+                                    endpoint.path = item.path;
+                                    endpoint.infoPath = [...verbsUncover.map(m => new InfoPathModel(m))];
+                                    coverage.uncover.push(endpoint);
                                 }
+                            } else {
+                                coverage.uncover.push(item);
                             }
                         });
 
-                        let cover = 0;
-                        endpointsTested.forEach(item => cover += item.verbs.length);
-
-                        let uncover = 0;
-                        uncoverageEndpoints.forEach(item => {
-                            if(item) {
-                                uncover += item.verbs.length
-                            }
-                        });
-
-                        let coverage = (cover * 100) / totalEndpoints;
-                        Log(`Coverage: ${coverage} %`);
-
-                        Log(`Uncoverage endpoints: ${uncover}`);
-                        uncoverageEndpoints.forEach(item => {
-                            if(item) {
-                                console.log(`Path: ${item.path} | Verbs: ${item.verbs}`);
-                            }
-                        });
+                        coverage.coverLog();
+                        coverage.uncoverLog();
                     }
                 });
             }
