@@ -10,7 +10,7 @@
     "version": {
         "Major": 0,
         "Minor": 1,
-        "Patch": 14
+        "Patch": 15
     },
     "instanceNameFormat": "API Coverage Test",
     "groups": [
@@ -21,14 +21,6 @@
         }
     ],
     "inputs": [
-        {
-            "name": "ApplicationName",
-            "type": "string",
-            "label": "Application Name",
-            "defaultValue": "",
-            "required": true,
-            "helpMarkDown": "Your project name"
-        },
         {
             "name": "ApiUrl",
             "type": "string",
@@ -64,13 +56,6 @@
                 "testSuite": "Test Suite",
                 "testCase": "Test Case"
             }
-        },
-        {
-            "name": "BuildNumber",
-            "type": "string",
-            "label": "Build Number",
-            "defaultValue": "$(Build.BuildNumber)",
-            "required": true
         },
         {
             "name": "Webhook",

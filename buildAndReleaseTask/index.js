@@ -55,7 +55,7 @@ var xml2js = require('xml2js');
 var parser = new xml2js.Parser({ attrkey: "ATTR" });
 function run() {
     return __awaiter(this, void 0, void 0, function () {
-        var apiUrl_1, swaggerJsonPath, testResultPath, whereIsTheTest_1, webhook_1, buildNumber_1, applicationName_1, url_1, testResultsFile;
+        var apiUrl_1, swaggerJsonPath, testResultPath, whereIsTheTest_1, webhook_1, url_1, testResultsFile;
         return __generator(this, function (_a) {
             try {
                 apiUrl_1 = task.getInput('ApiUrl', true);
@@ -63,8 +63,8 @@ function run() {
                 testResultPath = task.getInput('TestsResultPath', true);
                 whereIsTheTest_1 = task.getInput('WhereIsTheTest', true);
                 webhook_1 = task.getInput('Webhook', false);
-                buildNumber_1 = task.getInput('BuildNumber', true);
-                applicationName_1 = task.getInput('ApplicationName', true);
+                // const buildNumber: string | undefined = task.getInput('BuildNumber', true);
+                // const applicationName: string | undefined = task.getInput('ApplicationName', true);
                 apiUrl_1 = (apiUrl_1 === null || apiUrl_1 === void 0 ? void 0 : apiUrl_1.endsWith('/')) ? apiUrl_1.slice(0, -1) : apiUrl_1;
                 swaggerJsonPath = (swaggerJsonPath === null || swaggerJsonPath === void 0 ? void 0 : swaggerJsonPath.startsWith('/')) ? swaggerJsonPath.substring(1) : swaggerJsonPath;
                 url_1 = apiUrl_1 + "/" + swaggerJsonPath;
@@ -143,7 +143,7 @@ function run() {
                                 coverage_1.coverLog();
                                 coverage_1.uncoverLog();
                                 if (webhook_1) {
-                                    var payload = new WebhookModel_1.WebhookModel(applicationName_1 !== null && applicationName_1 !== void 0 ? applicationName_1 : '', apiUrl_1 !== null && apiUrl_1 !== void 0 ? apiUrl_1 : '', buildNumber_1 !== null && buildNumber_1 !== void 0 ? buildNumber_1 : '', coverage_1.existed, coverage_1.tested, coverage_1.getCoverage(), endpointsExists_1, endpointsTested_1, coverage_1.uncover);
+                                    var payload = new WebhookModel_1.WebhookModel('', apiUrl_1 !== null && apiUrl_1 !== void 0 ? apiUrl_1 : '', '', coverage_1.existed, coverage_1.tested, coverage_1.getCoverage(), endpointsExists_1, endpointsTested_1, coverage_1.uncover);
                                     var data = JSON.stringify(payload);
                                     Log('Payload generated:');
                                     console.log(data);

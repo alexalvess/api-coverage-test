@@ -17,8 +17,8 @@ async function run() {
         const testResultPath: string | undefined = task.getInput('TestsResultPath', true);
         const whereIsTheTest: string | undefined = task.getInput('WhereIsTheTest', true);
         const webhook: string | undefined = task.getInput('Webhook', false);
-        const buildNumber: string | undefined = task.getInput('BuildNumber', true);
-        const applicationName: string | undefined = task.getInput('ApplicationName', true);
+        // const buildNumber: string | undefined = task.getInput('BuildNumber', true);
+        // const applicationName: string | undefined = task.getInput('ApplicationName', true);
 
         apiUrl = apiUrl?.endsWith('/') ? apiUrl.slice(0, -1) : apiUrl;
         swaggerJsonPath = swaggerJsonPath?.startsWith('/') ? swaggerJsonPath.substring(1) : swaggerJsonPath;
@@ -112,9 +112,9 @@ async function run() {
 
                         if(webhook) {
                             const payload = new WebhookModel(
-                                applicationName ?? '',
+                                '',
                                 apiUrl ?? '', 
-                                buildNumber ?? '', 
+                                '', 
                                 coverage.existed,
                                 coverage.tested,
                                 coverage.getCoverage(),
