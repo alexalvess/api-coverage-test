@@ -1,7 +1,7 @@
 import { EndpointModel } from "./EndpointModel";
 
 export class WebhookTestModel {
-    createDate: Date;
+    createAt: Date;
     buildNumber: string;
     totalEndpointsFound: number;
     totalEndpointsTested: number;
@@ -12,7 +12,7 @@ export class WebhookTestModel {
     endpoints: Array<EndpointModel>;
 
     constructor() {
-        this.createDate = new Date();
+        this.createAt = new Date();
         this.buildNumber = '';
         this.totalEndpointsFound = 0;
         this.totalEndpointsTested = 0;
