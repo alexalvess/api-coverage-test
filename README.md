@@ -7,4 +7,5 @@ According to the JSON file of Swagger of API and the JUnit file result test, it 
 ![Flow](images/flow.png)
 
 ## How to use
- 
+This is the window of Custom Task in a Pipeline:
+![Flow](images/buidpipeline.png)
