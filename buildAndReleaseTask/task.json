@@ -13,6 +13,13 @@
         "Patch": 11
     },
     "instanceNameFormat": "API Coverage Test",
+    "groups": [
+        {
+            "name": "Webhook",
+            "displayName": "Webhook",
+            "isExpanded": true
+        }
+    ],
     "inputs": [
         {
             "name": "ApiUrl",
@@ -57,7 +64,7 @@
             "required": false,
             "defaultValue": "",
             "helpMarkDown": "Inform the endpoint that receive a payload's coverage result.",
-            "groupName": "advanced"
+            "groupName": "Webhook"
         }
     ],
     "execution": {

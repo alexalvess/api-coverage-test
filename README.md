@@ -5,3 +5,5 @@ According to the JSON file of Swagger of API and the JUnit file result test, it 
 
 ## The flow
 ![Flow](./images/flow.png)
+
+## How to use
