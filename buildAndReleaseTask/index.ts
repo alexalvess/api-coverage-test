@@ -1,5 +1,5 @@
 import task = require('azure-pipelines-task-lib/task');
-// import httpsRequest = require('https');
+import https = require('https');
 import { CoverageModel } from './models/CoverageModel';
 import { EndpointModel } from './models/EndpointModel';
 import { InfoPathModel } from './models/InfoPathModel';
@@ -18,9 +18,9 @@ async function run() {
         let swaggerJsonPath: string | undefined = task.getInput('SwaggerJsonPath', true);
         const testResultPath: string | undefined = task.getInput('TestsResultPath', true);
         const whereIsTheTest: string | undefined = task.getInput('WhereIsTheTest', true);
-        // const webhook: string | undefined = task.getInput('Webhook', false);
-        // const buildNumber: string | undefined = task.getInput('BuildNumber', true);
-        // const applicationName: string | undefined = task.getInput('ApplicationName', true);
+        const webhook: string | undefined = task.getInput('Webhook', false);
+        const buildNumber: string | undefined = task.getInput('BuildNumber', true);
+        const applicationName: string | undefined = task.getInput('ApplicationName', true);
 
         apiUrl = apiUrl?.endsWith('/') ? apiUrl.slice(0, -1) : apiUrl;
         swaggerJsonPath = swaggerJsonPath?.startsWith('/') ? swaggerJsonPath.substring(1) : swaggerJsonPath;
@@ -112,45 +112,45 @@ async function run() {
                         coverage.coverLog();
                         coverage.uncoverLog();
 
-                        // if(webhook) {
-                        //     const payload = new WebhookModel(
-                        //         '',
-                        //         apiUrl ?? '', 
-                        //         '', 
-                        //         coverage.existed,
-                        //         coverage.tested,
-                        //         coverage.getCoverage(),
-                        //         endpointsExists,
-                        //         endpointsTested,
-                        //         coverage.uncover);
+                        if(webhook) {
+                            const payload = new WebhookModel(
+                                '',
+                                apiUrl ?? '', 
+                                '', 
+                                coverage.existed,
+                                coverage.tested,
+                                coverage.getCoverage(),
+                                endpointsExists,
+                                endpointsTested,
+                                coverage.uncover);
                             
-                        //     const data = JSON.stringify(payload);
+                            const data = JSON.stringify(payload);
 
-                        //     Log('Payload generated:');
-                        //     console.log(data);
-                            // Log(`Send to API: ${webhook}`);
+                            Log('Payload generated:');
+                            console.log(data);
+                            Log(`Send to API: ${webhook}`);
 
-                            // var rq = https.request(
-                            //     webhook, 
-                            //     { 
-                            //         method: 'POST',
-                            //         headers: {
-                            //             'Content-Type': 'application/json',
-                            //             'Content-Length': data.length
-                            //         }
-                            //     }, (response) => {
-                            //         const statusCode = response.statusCode as number;
-                            //         Log(`StatusCode of request: ${response.statusCode}`);
+                            var rq = https.request(
+                                webhook, 
+                                { 
+                                    method: 'POST',
+                                    headers: {
+                                        'Content-Type': 'application/json',
+                                        'Content-Length': data.length
+                                    }
+                                }, (response) => {
+                                    const statusCode = response.statusCode as number;
+                                    Log(`StatusCode of request: ${response.statusCode}`);
 
-                            //         if(statusCode >= 200 && statusCode <= 299) {
-                            //             Log('Request made successfully.');
-                            //         } else {
-                            //             Log('Error to make the request.')
-                            //         }
-                            //     });
+                                    if(statusCode >= 200 && statusCode <= 299) {
+                                        Log('Request made successfully.');
+                                    } else {
+                                        Log('Error to make the request.')
+                                    }
+                                });
 
-                            // rq.write(data);
-                        // }
+                            rq.write(data);
+                        }
                     }
                 });
             }

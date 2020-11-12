@@ -10,7 +10,7 @@
     "version": {
         "Major": 0,
         "Minor": 1,
-        "Patch": 19
+        "Patch": 20
     },
     "instanceNameFormat": "API Coverage Test",
     "groups": [
@@ -21,6 +21,14 @@
         }
     ],
     "inputs": [
+        {
+            "name": "ApplicationName",
+            "type": "string",
+            "label": "Application Name",
+            "defaultValue": "",
+            "required": true,
+            "helpMarkDown": "Your project name"
+        },
         {
             "name": "ApiUrl",
             "type": "string",
@@ -56,6 +64,22 @@
                 "testSuite": "Test Suite",
                 "testCase": "Test Case"
             }
+        },
+        {
+            "name": "BuildNumber",
+            "type": "string",
+            "label": "Build Number",
+            "defaultValue": "$(Build.BuildNumber)",
+            "required": true
+        },
+        {
+            "name": "Webhook",
+            "type": "string",
+            "label": "Webhook",
+            "required": false,
+            "defaultValue": "",
+            "helpMarkDown": "Inform the endpoint that receive a payload's coverage result.",
+            "groupName": "WebhookGroup"
         }
     ],
     "execution": {

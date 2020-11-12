@@ -44,7 +44,7 @@ var __spreadArrays = (this && this.__spreadArrays) || function () {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 var task = require("azure-pipelines-task-lib/task");
-// import httpsRequest = require('https');
+var https = require("https");
 var CoverageModel_1 = require("./models/CoverageModel");
 var EndpointModel_1 = require("./models/EndpointModel");
 var InfoPathModel_1 = require("./models/InfoPathModel");
@@ -55,7 +55,7 @@ var xml2js = require('xml2js');
 var parser = new xml2js.Parser({ attrkey: "ATTR" });
 function run() {
     return __awaiter(this, void 0, void 0, function () {
-        var apiUrl_1, swaggerJsonPath, testResultPath, whereIsTheTest_1, webhook_1, url_1, testResultsFile;
+        var apiUrl_1, swaggerJsonPath, testResultPath, whereIsTheTest_1, webhook_1, buildNumber, applicationName, url_1, testResultsFile;
         return __generator(this, function (_a) {
             try {
                 Log('Start coverage process.');
@@ -64,8 +64,8 @@ function run() {
                 testResultPath = task.getInput('TestsResultPath', true);
                 whereIsTheTest_1 = task.getInput('WhereIsTheTest', true);
                 webhook_1 = task.getInput('Webhook', false);
-                // const buildNumber: string | undefined = task.getInput('BuildNumber', true);
-                // const applicationName: string | undefined = task.getInput('ApplicationName', true);
+                buildNumber = task.getInput('BuildNumber', true);
+                applicationName = task.getInput('ApplicationName', true);
                 apiUrl_1 = (apiUrl_1 === null || apiUrl_1 === void 0 ? void 0 : apiUrl_1.endsWith('/')) ? apiUrl_1.slice(0, -1) : apiUrl_1;
                 swaggerJsonPath = (swaggerJsonPath === null || swaggerJsonPath === void 0 ? void 0 : swaggerJsonPath.startsWith('/')) ? swaggerJsonPath.substring(1) : swaggerJsonPath;
                 url_1 = apiUrl_1 + "/" + swaggerJsonPath;
@@ -149,24 +149,23 @@ function run() {
                                     Log('Payload generated:');
                                     console.log(data);
                                     Log("Send to API: " + webhook_1);
-                                    // var rq = https.request(
-                                    //     webhook, 
-                                    //     { 
-                                    //         method: 'POST',
-                                    //         headers: {
-                                    //             'Content-Type': 'application/json',
-                                    //             'Content-Length': data.length
-                                    //         }
-                                    //     }, (response) => {
-                                    //         const statusCode = response.statusCode as number;
-                                    //         Log(`StatusCode of request: ${response.statusCode}`);
-                                    //         if(statusCode >= 200 && statusCode <= 299) {
-                                    //             Log('Request made successfully.');
-                                    //         } else {
-                                    //             Log('Error to make the request.')
-                                    //         }
-                                    //     });
-                                    // rq.write(data);
+                                    var rq = https.request(webhook_1, {
+                                        method: 'POST',
+                                        headers: {
+                                            'Content-Type': 'application/json',
+                                            'Content-Length': data.length
+                                        }
+                                    }, function (response) {
+                                        var statusCode = response.statusCode;
+                                        Log("StatusCode of request: " + response.statusCode);
+                                        if (statusCode >= 200 && statusCode <= 299) {
+                                            Log('Request made successfully.');
+                                        }
+                                        else {
+                                            Log('Error to make the request.');
+                                        }
+                                    });
+                                    rq.write(data);
                                 }
                             }
                         });
