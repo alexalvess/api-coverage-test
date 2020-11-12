@@ -14,7 +14,7 @@ First, it is a premise that we will build integration tests for an API. In this 
 
 When these concepts are aligned, we can go to the next step. 
 
-We have many different tools that we can use to build an integration test, like Postman, Cypress, or Supertest. In each tool, the report, or test result, generates in a different way. So, pay attention! You need to inform the API Path and the Verb in the right place! In the XML Report, observe where is the description of the test. In Postman, will be inside the <testsuite> tag, and when you save your test, on the field name, just give the correct description, like belowm:
+We have many different tools that we can use to build an integration test, like Postman, Cypress, or Supertest. In each tool, the report, or test result, generates in a different way. So, pay attention! You need to inform the API Path and the Verb in the right place! In the XML Report, observe where is the description of the test. In Postman, will be inside the <testsuite> tag, and when you save your test, on the field name, just give the correct description, like below:
 ![Flow](https://raw.githubusercontent.com/alexalvess/api-coverage-test/master/images/postmantestname.png)
 
 Usually, in other tool that use JS, the description of the test will be inside the <testcase> tag. So, if you use the *[describe...it]* or *[context...it]*, put the API Path and Verb inside the *[it]* method, like that:
@@ -30,11 +30,11 @@ Now that we build our test, let's see below. This is the window of Custom Task i
 
 - ApplicationName: the name of your application/software/project, like *[Aurora.Api]*
 - Api url: the url referring your API, like *[https://aurora-project.azurewebsites.net/]*
-- Path of Swagger's JSON: the path where is localed the json of API's Swagger, like *[/swagger/v1/swagger.json]*
+- Path of Swagger's JSON: the path where is located the json of API's Swagger, like *[/swagger/v1/swagger.json]*
 - Test Result Path: the path where is located the junit file, which contains the tests result, like *[$(System.DefaultWorkingDirectory)\Results\junitReport.xml]*
 - Webhook: the URL that the result of the coverage process will be sent by the custom task
 
-The other both options we will talk more specificlly.
+The other both options we will talk more specifically.
 
 ### Where is the test name 🤔
 In this section we have two options, and you choose according to the way the JUnit file test was generated. Specifically, is where located your test name in format *[VERB /path]*.
@@ -46,7 +46,7 @@ And the second option, which is "Test Case", refers to test name is located into
 ![Test Case Example](https://raw.githubusercontent.com/alexalvess/api-coverage-test/master/images/testcase.png)
 
 ### Webhook 🤔
-When the generate coverage processing to end, the custom task will call an API, if the Webhook field is filled, and will pass some datas of the coverage generated.
+When the generate coverage processing to end, the custom task will call an API, if the Webhook field is filled, and will pass some data of the coverage generated.
 The payload model that will be generated is:
 
 **VERB**: POST
