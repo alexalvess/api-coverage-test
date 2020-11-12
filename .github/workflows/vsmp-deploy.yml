@@ -10,7 +10,20 @@ on:
     branches: [ master ]
 
 jobs:
-  build-and-publish:
+  build:
+  
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Use Node.js 10.x
+      uses: actions/setup-node@v1
+      with:
+        node-version: 10.x
+    - run: npm install --prefix ./buildAndReleaseTask package.json
+    - run: npm run build --prefix ./buildAndReleaseTask
+
+  publish:
 
     runs-on: ubuntu-latest
 
@@ -21,8 +34,6 @@ jobs:
       with:
         node-version: 10.x
     - run: npm install -g tfx-cli
-    - run: npm install --prefix ./buildAndReleaseTask package.json
-    - run: npm run build --prefix ./buildAndReleaseTask
     - name: Publish Extension
       run: tfx extension publish --manifest-globs vss-extension.json --token ${{ secrets.VS_MARKET_PLACE_TOKEN }} --rev-version
     - name: Update resources
