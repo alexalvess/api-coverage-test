@@ -104,3 +104,7 @@ See this extension in [Visual Studio Market Place](https://marketplace.visualstu
 
 ## About ℹ:
 This custom task was developed by [Alex Alves](https://www.linkedin.com/in/alexalvess/) and encouraged by [XP Inc.](https://www.xpi.com.br/)
+
+---
+
+## FAQ
