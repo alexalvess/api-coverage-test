@@ -18,7 +18,7 @@ async function run() {
         let swaggerJsonPath: string | undefined = task.getInput('SwaggerJsonPath', true);
         const testResultPath: string | undefined = task.getInput('TestsResultPath', true);
         const whereIsTheTest: string | undefined = task.getInput('WhereIsTheTest', true);
-        const webhook: string | undefined = task.getInput('Webhook', false);
+        // const webhook: string | undefined = task.getInput('Webhook', false);
         // const buildNumber: string | undefined = task.getInput('BuildNumber', true);
         // const applicationName: string | undefined = task.getInput('ApplicationName', true);
 
@@ -112,23 +112,23 @@ async function run() {
                         coverage.coverLog();
                         coverage.uncoverLog();
 
-                        if(webhook) {
-                            const payload = new WebhookModel(
-                                '',
-                                apiUrl ?? '', 
-                                '', 
-                                coverage.existed,
-                                coverage.tested,
-                                coverage.getCoverage(),
-                                endpointsExists,
-                                endpointsTested,
-                                coverage.uncover);
+                        // if(webhook) {
+                        //     const payload = new WebhookModel(
+                        //         '',
+                        //         apiUrl ?? '', 
+                        //         '', 
+                        //         coverage.existed,
+                        //         coverage.tested,
+                        //         coverage.getCoverage(),
+                        //         endpointsExists,
+                        //         endpointsTested,
+                        //         coverage.uncover);
                             
-                            const data = JSON.stringify(payload);
+                        //     const data = JSON.stringify(payload);
 
-                            Log('Payload generated:');
-                            console.log(data);
-                            Log(`Send to API: ${webhook}`);
+                        //     Log('Payload generated:');
+                        //     console.log(data);
+                            // Log(`Send to API: ${webhook}`);
 
                             // var rq = https.request(
                             //     webhook, 
@@ -150,7 +150,7 @@ async function run() {
                             //     });
 
                             // rq.write(data);
-                        }
+                        // }
                     }
                 });
             }

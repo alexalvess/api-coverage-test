@@ -10,7 +10,7 @@
     "version": {
         "Major": 0,
         "Minor": 1,
-        "Patch": 17
+        "Patch": 19
     },
     "instanceNameFormat": "API Coverage Test",
     "groups": [
@@ -56,15 +56,6 @@
                 "testSuite": "Test Suite",
                 "testCase": "Test Case"
             }
-        },
-        {
-            "name": "Webhook",
-            "type": "string",
-            "label": "Webhook",
-            "required": false,
-            "defaultValue": "",
-            "helpMarkDown": "Inform the endpoint that receive a payload's coverage result.",
-            "groupName": "WebhookGroup"
         }
     ],
     "execution": {
