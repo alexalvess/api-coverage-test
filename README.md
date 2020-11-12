@@ -8,7 +8,7 @@ According to the JSON file of Swagger of API and the JUnit file result test, it 
 
 ## How to use 📚
 This is the window of Custom Task in a Pipeline:
-![Flow](https://raw.githubusercontent.com/alexalvess/api-coverage-test/master/images/buidpipeline.png)
+![Flow](https://raw.githubusercontent.com/alexalvess/api-coverage-test/master/images/buildpipeline.png)
 
 - Api url: the url referring your API, like *[https://aurora-project.azurewebsites.net/]*
 - Path of Swagger's JSON: the path where is localed the json of API's Swagger, like *[/swagger/v1/swagger.json]*
@@ -16,7 +16,7 @@ This is the window of Custom Task in a Pipeline:
 
 The other both options we will talk more specificlly.
 
-#### Where is the test name 🤔
+### Where is the test name 🤔
 In this section we have two options, and you choose according to the way the JUnit file test was generated. Specifically, is where located your test name in format *[VERB /path]*.
 
 The first option, which is "Test Suite", refers to test name is located into the tag *<testsuite>*, like below:
@@ -25,7 +25,7 @@ The first option, which is "Test Suite", refers to test name is located into the
 And the second option, which is "Test Case", refers to test name is located into the tag *<testcase>* which is located too inside the tag *<testsuite>*, like below:
 ![Test Case Example](https://raw.githubusercontent.com/alexalvess/api-coverage-test/master/images/testcase.png)
 
-#### Webhook 🤔
+### Webhook 🤔
 When the generate coverage processing to end, the custom task will call an API, if the Webhook field is filled, and will pass some datas of the coverage generated.
 The payload model that will be generated is:
 
@@ -73,6 +73,10 @@ The payload model that will be generated is:
 	"totalFailure": "number"
 }
 ```
+
+### Now, let's see the pipeline execution
+![Pipeline execution](https://raw.githubusercontent.com/alexalvess/api-coverage-test/master/images/pipelineexecution.png)
+
 ---
 
 ## We are online 🚀!
