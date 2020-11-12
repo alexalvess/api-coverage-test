@@ -2,7 +2,7 @@
     "manifestVersion": 1,
     "id": "task-702d7430-c3a9-422a-87f2-569ed16ba6be",
     "name": "Coverage API Test",
-    "version": "0.0.48",
+    "version": "0.0.49",
     "publisher": "AlexAlves",
     "targets": [
         {
