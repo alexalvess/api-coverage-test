@@ -58,6 +58,7 @@ function run() {
         var apiUrl_1, swaggerJsonPath, testResultPath, whereIsTheTest_1, webhook_1, url_1, testResultsFile;
         return __generator(this, function (_a) {
             try {
+                Log('Start coverage process.');
                 apiUrl_1 = task.getInput('ApiUrl', true);
                 swaggerJsonPath = task.getInput('SwaggerJsonPath', true);
                 testResultPath = task.getInput('TestsResultPath', true);

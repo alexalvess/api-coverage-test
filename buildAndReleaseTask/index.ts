@@ -12,6 +12,8 @@ const parser = new xml2js.Parser({ attrkey: "ATTR" });
 
 async function run() {
     try {
+        Log('Start coverage process.');
+
         let apiUrl: string | undefined = task.getInput('ApiUrl', true);
         let swaggerJsonPath: string | undefined = task.getInput('SwaggerJsonPath', true);
         const testResultPath: string | undefined = task.getInput('TestsResultPath', true);
