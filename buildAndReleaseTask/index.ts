@@ -145,7 +145,7 @@ async function run() {
                                     if(statusCode >= 200 && statusCode <= 299) {
                                         Log('Request made successfully.');
                                     } else {
-                                        Log('Error to make the request.')
+                                        task.setResult(task.TaskResult.Failed, 'Error to make request');
                                     }
                                 });
 
