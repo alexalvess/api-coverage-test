@@ -42,7 +42,9 @@ jobs:
 
     runs-on: ubuntu-latest
 
-    steps:    
+    steps:
+    - name: List Files
+      run: ls -d    
     - name: Update VSS Extension File
       uses: test-room-7/action-update-file@v1
       with:
@@ -56,8 +58,6 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: List Files
-      run: ls -d
     - name: Use Node.js 10.x
       uses: actions/setup-node@v1
       with:
