@@ -4,7 +4,9 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "build": "tsc"
+    "build": "tsc",
+    "pack": "..\\scripts\\packExtension.sh",
+    "publish": "..\\scripts\\publishExtension.sh"
   },
   "author": "",
   "license": "ISC",
