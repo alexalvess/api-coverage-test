@@ -36,21 +36,21 @@ jobs:
         node-version: 10.x
     - name: 'Pack Extension'
       run: npm run pack --prefix ./buildAndReleaseTask 
-
-  update-resource:
-    needs: [pack]
-
-    runs-on: ubuntu-latest
-
-    steps:
-    - name: List Files
-      run: ls *
     - name: Update VSS Extension File
       uses: test-room-7/action-update-file@v1
       with:
         file-path: vss-extension.json
         commit-msg: Update resources
         github-token: ${{ secrets.GITHUB_TOKEN }}
+
+#  update-resource:
+#    needs: [pack]
+
+#    runs-on: ubuntu-latest
+
+#    steps:
+  
+    
 
   publish:
     needs: [update-resource]
