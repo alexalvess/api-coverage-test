@@ -2,7 +2,7 @@ name: VS Market Place Deploy
 
 on:
   push:
-    branches: [ master ] 
+    branches: [ master, homologation ] 
   pull_request:
     branches: [ master ]
 
