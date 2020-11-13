@@ -22,7 +22,7 @@ jobs:
     - run: npm install -g tfx-cli
     - run: npm install -g json
 
-  pack:
+  pack-publish:
     if: github.base_ref == false
     needs: [build]
 
@@ -41,17 +41,6 @@ jobs:
       with:
         file-path: vss-extension.json
         commit-msg: Update resources
-        github-token: ${{ secrets.GITHUB_TOKEN }}    
-
-  publish:
-    needs: [pack]
-
-    runs-on: ubuntu-latest
-
-    steps:
-    - name: Use Node.js 10.x
-      uses: actions/setup-node@v1
-      with:
-        node-version: 10.x
+        github-token: ${{ secrets.GITHUB_TOKEN }}
     - name: Publish Extension
       run: npm run publish ${{ secrets.VS_MARKET_PLACE_TOKEN }} --prefix ./buildAndReleaseTask 
