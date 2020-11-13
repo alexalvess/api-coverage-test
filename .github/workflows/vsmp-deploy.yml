@@ -41,19 +41,10 @@ jobs:
       with:
         file-path: vss-extension.json
         commit-msg: Update resources
-        github-token: ${{ secrets.GITHUB_TOKEN }}
-
-#  update-resource:
-#    needs: [pack]
-
-#    runs-on: ubuntu-latest
-
-#    steps:
-  
-    
+        github-token: ${{ secrets.GITHUB_TOKEN }}    
 
   publish:
-    needs: [update-resource]
+    needs: [pack]
 
     runs-on: ubuntu-latest
 
