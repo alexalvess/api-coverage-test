@@ -30,10 +30,9 @@ jobs:
 
     steps:
     - name: 'Pack Extension'
-      working-directory: scripts
       run: |
-        chmod +x ./packExtension.sh
-        ./packExtension.sh
+        chmod +x ./scripts/packExtension.sh
+        ./scripts/packExtension.sh
 
   update-resource:
     needs: [pack]
@@ -55,7 +54,6 @@ jobs:
 
     steps:
     - name: Publish Extension
-      working-directory: scripts
       run: |
-        chmod +x ./publishExtension.sh
-        ./publishExtension.sh ${{ secrets.VS_MARKET_PLACE_TOKEN }}
+        chmod +x ./scripts/publishExtension.sh
+        ./scripts/publishExtension.sh ${{ secrets.VS_MARKET_PLACE_TOKEN }}
