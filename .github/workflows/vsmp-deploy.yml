@@ -34,7 +34,11 @@ jobs:
       with:
         interpreter: bash
         packages: bash
-        script: sh ./scripts/packExtension.sh
+        script: |
+          rm -f temp.json
+          echo "Start pack proccess"
+          RESULT=$(tfx extension create --manifest-globs vss-extension.json --rev-version --json)
+          echo "$RESULT" > temp.json
 
   update-resource:
     needs: [pack]
