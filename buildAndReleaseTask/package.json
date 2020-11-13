@@ -6,7 +6,7 @@
   "scripts": {
     "build": "tsc",
     "pack": "chmod -x ../scripts/packExtension.sh",
-    "publish": "../scripts/publishExtension.sh"
+    "publish": "chmod -x ../scripts/publishExtension.sh;"
   },
   "author": "",
   "license": "ISC",
