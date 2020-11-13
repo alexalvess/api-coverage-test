@@ -29,9 +29,11 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: 'Execute bash'
+    - name: 'Pack Extension'
+      working-directory: scripts
       run: |
-        sh packExtension.sh
+        chmod +x ./packExtension.sh
+        ./packExtension.sh
 
   update-resource:
     needs: [pack]
@@ -53,5 +55,7 @@ jobs:
 
     steps:
     - name: Publish Extension
+      working-directory: scripts
       run: |
-        sh publishExtension.sh ${{ secrets.VS_MARKET_PLACE_TOKEN }}
+        chmod +x ./publishExtension.sh
+        ./publishExtension.sh ${{ secrets.VS_MARKET_PLACE_TOKEN }}
