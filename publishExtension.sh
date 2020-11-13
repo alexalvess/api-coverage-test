@@ -1,4 +1,5 @@
 echo "Start publish proccess"
+TOKEN=`echo $1`
 RESULT=`cat temp.json`
 PUBLISHER=`echo $RESULT | json publisher`
 VERSION=`echo $RESULT | json version`
@@ -7,7 +8,7 @@ FILE="$PUBLISHER.$EXTENSIONID-$VERSION.vsix"
 
 echo $FILE
 
-tfx extension publish --vsix $FILE --token tv4qnnlldyvxwx63yw4qx4qi3q5ybmxu3oxclx6of6pcv5gtci2q
+tfx extension publish --vsix $FILE --token $TOKEN
 
 rm -f temp.json
 rm -f $FILE
