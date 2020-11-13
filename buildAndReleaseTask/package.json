@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "build": "tsc",
-    "pack": "../scripts/packExtension.sh",
+    "pack": "chmod -x ../scripts/packExtension.sh",
     "publish": "../scripts/publishExtension.sh"
   },
   "author": "",
