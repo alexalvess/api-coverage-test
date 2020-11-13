@@ -28,12 +28,10 @@ jobs:
 
     runs-on: ubuntu-latest
 
-    steps:
+    steps: 
     - name: Pack Extension
       uses: workflow/nix-shell-action@v1
       with:
-        interpreter: bash
-        packages: bash
         script: |
           rm -f temp.json
           echo "Start pack proccess"
