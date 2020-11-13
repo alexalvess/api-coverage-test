@@ -24,6 +24,8 @@ jobs:
     - run: npm run build --prefix ./buildAndReleaseTask 
 
   publish:
+    if: !github.base_ref
+    needs: [build]
 
     runs-on: ubuntu-latest
 
