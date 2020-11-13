@@ -13,12 +13,14 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
-    - name: Use Node.js 10.x
+    - name: Use Node 10.x
       uses: actions/setup-node@v1
       with:
         node-version: 10.x
-    - run: npm install --prefix ./buildAndReleaseTask package.json
-    - run: npm run build --prefix ./buildAndReleaseTask 
+    - name: Install Dependencies
+      run: npm install --prefix ./buildAndReleaseTask package.json
+    - name: Build Task
+      run: npm run build --prefix ./buildAndReleaseTask 
 
   pack-publish:
     if: github.base_ref == false
@@ -28,11 +30,12 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
-    - name: Use Node.js 10.x
+    - name: Use Node 10.x
       uses: actions/setup-node@v1
       with:
         node-version: 10.x
-    - run: npm install -g tfx-cli
+    - name: Install tfx-cli
+      run: npm install -g tfx-cli
     - name: Pack Extension
       run: tfx extension create --manifest-globs vss-extension.json --rev-version
     - name: Validation the Extension
