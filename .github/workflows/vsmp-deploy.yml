@@ -30,7 +30,7 @@ jobs:
 
     steps:
     - name: 'Pack Extension'
-      run: npm run pack --prefix ./buildAndReleaseTask
+      run: npm run pack --prefix ./buildAndReleaseTask package.json
 
   update-resource:
     needs: [pack]
@@ -52,4 +52,4 @@ jobs:
 
     steps:
     - name: Publish Extension
-      run: npm run publish ${{ secrets.VS_MARKET_PLACE_TOKEN }} --prefix ./buildAndReleaseTask
+      run: npm run publish ${{ secrets.VS_MARKET_PLACE_TOKEN }} --prefix ./buildAndReleaseTask package.json
