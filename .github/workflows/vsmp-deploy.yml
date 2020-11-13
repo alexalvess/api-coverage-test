@@ -43,4 +43,4 @@ jobs:
         commit-msg: Update resources
         github-token: ${{ secrets.GITHUB_TOKEN }}
     - name: Publish Extension
-      run: npm run publish -- ${{ secrets.VS_MARKET_PLACE_TOKEN }} --prefix ./buildAndReleaseTask
+      run: npm run publish --prefix ./buildAndReleaseTask -- ${{ secrets.VS_MARKET_PLACE_TOKEN }}
