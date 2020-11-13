@@ -31,7 +31,7 @@ jobs:
     steps:
     - name: 'Execute bash'
       run: |
-        sh ./packExtension.sh
+        sh packExtension.sh
 
   update-resource:
     needs: [pack]
@@ -54,4 +54,4 @@ jobs:
     steps:
     - name: Publish Extension
       run: |
-        sh ./publishExtension.sh ${{ secrets.VS_MARKET_PLACE_TOKEN }}
+        sh publishExtension.sh ${{ secrets.VS_MARKET_PLACE_TOKEN }}
