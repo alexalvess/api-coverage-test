@@ -8,7 +8,7 @@ FILE="../$PUBLISHER.$EXTENSIONID-$VERSION.vsix"
 
 echo $FILE
 
-tfx extension publish --root ../ --vsix $FILE --token $TOKEN
+tfx extension publish --vsix $FILE --token $TOKEN
 
 rm -f ../temp.json
 rm -f $FILE
