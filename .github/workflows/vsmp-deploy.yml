@@ -29,6 +29,10 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+    - name: Use Node.js 10.x
+      uses: actions/setup-node@v1
+      with:
+        node-version: 10.x
     - name: 'Pack Extension'
       run: npm run pack --prefix ./buildAndReleaseTask 
 
@@ -51,5 +55,9 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+    - name: Use Node.js 10.x
+      uses: actions/setup-node@v1
+      with:
+        node-version: 10.x
     - name: Publish Extension
       run: npm run publish ${{ secrets.VS_MARKET_PLACE_TOKEN }} --prefix ./buildAndReleaseTask 
