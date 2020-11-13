@@ -39,7 +39,7 @@ jobs:
     - name: Pack Extension
       run: tfx extension create --manifest-globs vss-extension.json --rev-version
     - name: Validation the Extension
-      run: tfx extension isvalid --publisher AlexAlves --extension-id task-702d7430-c3a9-422a-87f2-569ed16ba6be --token ${{ secrets.VS_MARKET_PLACE_TOKEN }}
+      run: tfx extension isvalid --publisher ${{ secrets.VS_MARKET_PLACE_PUBLISHER }} --extension-id ${{ secrets.VS_MARKET_PLACE_EXTENSION_ID }} --token ${{ secrets.VS_MARKET_PLACE_TOKEN }}
     - name: Update VSS Extension File
       if: github.ref == 'homologation'
       uses: test-room-7/action-update-file@v1
