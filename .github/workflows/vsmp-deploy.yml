@@ -30,20 +30,16 @@ jobs:
 
     steps: 
     - name: Pack Extension
-      uses: workflow/nix-shell-action@v1
+      uses: azohra/shell-linter@v0.4.0
       with:
-        script: |
-          rm -f temp.json
-          echo "Start pack proccess"
-          RESULT=$(tfx extension create --manifest-globs vss-extension.json --rev-version --json)
-          echo "$RESULT" > temp.json
+        path: ./scripts/packExtension.sh
 
   update-resource:
     needs: [pack]
 
     runs-on: ubuntu-latest
 
-    steps:
+    steps:    
     - name: Update VSS Extension File
       uses: test-room-7/action-update-file@v1
       with:
