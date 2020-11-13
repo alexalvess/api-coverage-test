@@ -3,13 +3,10 @@
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
-  "config": {
-    "token": "----"
-  },
   "scripts": {
     "build": "tsc",
     "pack": "chmod -x ../scripts/packExtension.sh",
-    "publish": "chmod -x ../scripts/publishExtension.sh $npm_package_config_token"
+    "publish": "chmod +x ../scripts/publishExtension.sh"
   },
   "author": "",
   "license": "ISC",
