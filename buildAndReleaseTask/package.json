@@ -5,8 +5,8 @@
   "main": "index.js",
   "scripts": {
     "build": "tsc",
-    "pack": "..\\scripts\\packExtension.sh",
-    "publish": "..\\scripts\\publishExtension.sh"
+    "pack": "../scripts/packExtension.sh",
+    "publish": "../scripts/publishExtension.sh"
   },
   "author": "",
   "license": "ISC",
