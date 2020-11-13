@@ -19,8 +19,6 @@ jobs:
         node-version: 10.x
     - run: npm install --prefix ./buildAndReleaseTask package.json
     - run: npm run build --prefix ./buildAndReleaseTask 
-    - run: npm install -g tfx-cli
-    - run: npm install -g json
 
   pack-publish:
     if: github.base_ref == false
@@ -34,6 +32,8 @@ jobs:
       uses: actions/setup-node@v1
       with:
         node-version: 10.x
+    - run: npm install -g tfx-cli
+    - run: npm install -g json
     - name: 'Pack Extension'
       run: npm run pack --prefix ./buildAndReleaseTask 
     - name: Update VSS Extension File
