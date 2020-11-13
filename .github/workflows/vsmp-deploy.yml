@@ -34,7 +34,7 @@ jobs:
       with:
         interpreter: bash
         packages: bash
-        script: ./scripts/packExtension.sh
+        script: sh ./scripts/packExtension.sh
 
   update-resource:
     needs: [pack]
