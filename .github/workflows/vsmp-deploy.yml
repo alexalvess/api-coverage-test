@@ -48,4 +48,5 @@ jobs:
         commit-msg: Update resources
         github-token: ${{ secrets.GITHUB_TOKEN }}
     - name: Publish Extension
+      if: github.ref == 'master'
       run: tfx extension publish --manifest-globs --token ${{ secrets.VS_MARKET_PLACE_TOKEN }}
