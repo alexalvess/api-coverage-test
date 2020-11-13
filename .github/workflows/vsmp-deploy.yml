@@ -29,10 +29,12 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: 'Pack Extension'
-      run: |
-        chmod +x ./scripts/packExtension.sh
-        ./scripts/packExtension.sh
+    - name: Pack Extension
+      uses: workflow/nix-shell-action@v1
+      with:
+        interpreter: bash
+        packages: bash
+        script: ./scripts/packExtension.sh
 
   update-resource:
     needs: [pack]
