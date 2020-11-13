@@ -49,6 +49,7 @@ jobs:
         file-path: vss-extension.json
         commit-msg: Update resources
         github-token: ${{ secrets.GITHUB_TOKEN }}
+        allow-removing: true
 
   publish:
     needs: [update-resource]
