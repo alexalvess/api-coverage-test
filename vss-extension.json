@@ -17,6 +17,7 @@
         "color": "rgb(224, 247, 246)",
         "theme": "light"
     },
+    "public": true,
     "tags": [
         "test",
         "integration test",
