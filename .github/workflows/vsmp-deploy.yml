@@ -41,12 +41,10 @@ jobs:
     - name: Validation the Extension
       run: tfx extension isvalid --publisher ${{ secrets.VS_MARKET_PLACE_PUBLISHER }} --extension-id ${{ secrets.VS_MARKET_PLACE_EXTENSION_ID }} --token ${{ secrets.VS_MARKET_PLACE_TOKEN }}
     - name: Update VSS Extension File
-      if: github.ref == 'homologation'
       uses: test-room-7/action-update-file@v1
       with:
         file-path: vss-extension.json
         commit-msg: Update resources
         github-token: ${{ secrets.GITHUB_TOKEN }}
     - name: Publish Extension
-      if: github.ref == 'master'
       run: tfx extension publish --manifest-globs --token ${{ secrets.VS_MARKET_PLACE_TOKEN }}
