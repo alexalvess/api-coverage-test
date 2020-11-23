@@ -40,7 +40,7 @@ jobs:
       with:
         node-version: 10.x
     - name: Download build results
-      run: actions/download-artifact@v2
+      uses: actions/download-artifact@v2
       with:
         name: buildResults
     - name: Install tfx-cli
