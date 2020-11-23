@@ -38,17 +38,20 @@ async function run() {
         const validFiles = getValidFiles(testResultPath, []);
         console.log(validFiles);
 
+        log(`Reading file: ${validFiles[0]}.`);
         const testResultsFile = fs.readFileSync(validFiles[0], "utf8");
         parser.parseString(testResultsFile, (error: any, result: any) => {
             if(error) {
-                log(`Error occurred.`);
                 task.setResult(task.TaskResult.Failed, JSON.stringify(error));
+                return;
             } else {
                 let endpointsTested: Array<EndpointModel> = new Array<EndpointModel>();
                 let endpointsExists: Array<EndpointModel> = new Array<EndpointModel>();
                 let coverage: CoverageModel = new CoverageModel();
 
                 if(whereIsTheTest === 'testSuite') {
+                    log('Reading tests in Test Suite tag.');
+
                     result.testsuites.testsuite.map((item: any) => {
                         const testName = item.ATTR.name as string;
                         const time = item.ATTR.time as number;
@@ -63,6 +66,8 @@ async function run() {
                         EndpointModel.setSamePath(endpointsTested, testName, time, executeAt, success, message);
                     });
                 } else {
+                    log('Reading tests in Test Case tag.');
+
                     result.testsuites.testsuite.map((item: any) => {
                         if(item.testcase) {
                             const executeAt = item.ATTR.timestamp as Date;
@@ -94,7 +99,7 @@ async function run() {
                         Object.keys(body.paths).forEach(element => {
                             let endpoint = new EndpointModel();
                             endpoint.path = element;
-                            endpoint.infoPath = Object.keys(body.paths[element]).map(el => new InfoPathModel(el.toUpperCase()))
+                            endpoint.infoPath = Object.keys(body.paths[element]).map(el => new InfoPathModel(el?.toUpperCase()))
                             endpointsExists.push(endpoint);
                         });
 
@@ -125,9 +130,9 @@ async function run() {
 
                         if(webhook) {
                             const payload = new WebhookModel(
-                                '',
+                                applicationName ?? '',
                                 apiUrl ?? '', 
-                                '', 
+                                buildNumber ?? '', 
                                 coverage.existed,
                                 coverage.tested,
                                 coverage.getCoverage(),

@@ -19,9 +19,13 @@ jobs:
         node-version: 10.x
     - name: Install Dependencies
       run: npm install --prefix ./buildAndReleaseTask package.json
-    - id: buildTask
-      name: Build Task
-      run: npm run build --prefix ./buildAndReleaseTask 
+    - name: Build Task
+      run: npm run build --prefix ./buildAndReleaseTask
+    - name: Upload build results
+      uses: actions/upload-artifact@v2
+      with:
+        name: buildResults
+        path: dist
 
   pack-publish:
     if: github.base_ref == false
@@ -35,12 +39,12 @@ jobs:
       uses: actions/setup-node@v1
       with:
         node-version: 10.x
-    - name: Install Dependencies
-      run: npm install --prefix ./buildAndReleaseTask package.json
+    - name: Download build results
+      run: actions/download-artifact@v2
+      with:
+        name: buildResults
     - name: Install tfx-cli
       run: npm install -g tfx-cli
-    - name: Build Task
-      run: npm run build --prefix ./buildAndReleaseTask 
     - name: Pack Extension
       run: tfx extension create --manifest-globs vss-extension.json --rev-version
     - name: Validation the Extension

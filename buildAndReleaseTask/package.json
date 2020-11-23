@@ -4,6 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
+    "start": "node ..\\dist\\index.js",
     "build": "tsc",
     "postbuild": "copy task.json ..\\dist && copy .taskkey ..\\dist"
   },
