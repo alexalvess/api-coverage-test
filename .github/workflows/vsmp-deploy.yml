@@ -26,6 +26,7 @@ jobs:
       with:
         name: buildResults
         path: dist
+        if-no-files-found: error
 
   pack-publish:
     if: github.base_ref == false
@@ -43,6 +44,7 @@ jobs:
       uses: actions/download-artifact@v2
       with:
         name: buildResults
+        path: dist
     - name: Install tfx-cli
       run: npm install -g tfx-cli
     - name: Pack Extension
