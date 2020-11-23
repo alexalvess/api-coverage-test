@@ -19,7 +19,8 @@ jobs:
         node-version: 10.x
     - name: Install Dependencies
       run: npm install --prefix ./buildAndReleaseTask package.json
-    - name: Build Task
+    - id: buildTask
+      name: Build Task
       run: npm run build --prefix ./buildAndReleaseTask 
 
   pack-publish:
@@ -34,6 +35,8 @@ jobs:
       uses: actions/setup-node@v1
       with:
         node-version: 10.x
+    - name: Install Dependencies
+      run: npm install --prefix ./buildAndReleaseTask package.json
     - name: Install tfx-cli
       run: npm install -g tfx-cli
     - name: Build Task
