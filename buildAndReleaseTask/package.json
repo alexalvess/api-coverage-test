@@ -5,10 +5,9 @@
   "main": "index.js",
   "scripts": {
     "build": "tsc",
-    "pack": "chmod -x ../scripts/packExtension.sh",
-    "publish": "chmod +x ../scripts/publishExtension.sh ; ../scripts/publishExtension.sh"
+    "postbuild": "copy task.json ..\\dist && copy .taskkey ..\\dist"
   },
-  "author": "",
+  "author": "AlexAlves",
   "license": "ISC",
   "dependencies": {
     "azure-pipelines-task-lib": "^3.0.6-preview.0",

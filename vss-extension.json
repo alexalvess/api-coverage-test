@@ -35,7 +35,7 @@
     },
     "files": [
         {
-            "path": "buildAndReleaseTask"
+            "path": "dist"
         }
     ],
     "repository": {
@@ -50,7 +50,7 @@
                 "ms.vss-distributed-task.tasks"
             ],
             "properties": {
-                "name": "buildAndReleaseTask"
+                "name": "dist"
             }
         }
     ]
