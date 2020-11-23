@@ -12,7 +12,7 @@ const parser = new xml2js.Parser({ attrkey: "ATTR" });
 
 async function run() {
     try {
-        Log('Start coverage process.');
+        log('Start coverage process.');
 
         let apiUrl: string | undefined = task.getInput('ApiUrl', true);
         let swaggerJsonPath: string | undefined = task.getInput('SwaggerJsonPath', true);
@@ -26,11 +26,22 @@ async function run() {
         swaggerJsonPath = swaggerJsonPath?.startsWith('/') ? swaggerJsonPath.substring(1) : swaggerJsonPath;
 
         const url = `${apiUrl}/${swaggerJsonPath}`;
+
+        if(!testResultPath) {
+            task.setResult(task.TaskResult.Failed, 'Directory not found.');
+            return;
+        }
+
+        log(`Reading test result directory: ${testResultPath}`);
         
-        Log(`Reading test result file: ${testResultPath}`);
-        const testResultsFile = fs.readFileSync(testResultPath, "utf8");
+        log(`Files found:`);
+        const validFiles = getValidFiles(testResultPath, []);
+        console.log(validFiles);
+
+        const testResultsFile = fs.readFileSync(validFiles[0], "utf8");
         parser.parseString(testResultsFile, (error: any, result: any) => {
             if(error) {
+                log(`Error occurred.`);
                 task.setResult(task.TaskResult.Failed, JSON.stringify(error));
             } else {
                 let endpointsTested: Array<EndpointModel> = new Array<EndpointModel>();
@@ -75,7 +86,7 @@ async function run() {
 
                 coverage.tested = EndpointModel.log('Endpoints tested', endpointsTested);
 
-                Log(`Reading Swagger of API: ${url}`);
+                log(`Reading Swagger of API: ${url}`);
                 request(url, { json: true }, (error: any, response: any, body: any) => {
                     if(error) {
                         task.setResult(task.TaskResult.Failed, JSON.stringify(error));
@@ -126,9 +137,9 @@ async function run() {
                             
                             const data = JSON.stringify(payload);
 
-                            Log('Payload generated:');
+                            log('Payload generated:');
                             console.log(data);
-                            Log(`Send to API: ${webhook}`);
+                            log(`Send to API: ${webhook}`);
 
                             var rq = https.request(
                                 webhook, 
@@ -140,10 +151,10 @@ async function run() {
                                     }
                                 }, (response) => {
                                     const statusCode = response.statusCode as number;
-                                    Log(`StatusCode of request: ${response.statusCode}`);
+                                    log(`StatusCode of request: ${response.statusCode}`);
 
                                     if(statusCode >= 200 && statusCode <= 299) {
-                                        Log('Request made successfully.');
+                                        log('Request made successfully.');
                                     } else {
                                         task.setResult(task.TaskResult.Failed, 'Error to make request');
                                     }
@@ -161,8 +172,26 @@ async function run() {
     }
 }
 
-function Log(message: string) {
+function log(message: string) {
     console.log(`############### ${message}`);
+}
+
+function verifySubDirectory(directory: string, fileName: string): boolean {
+    return fs.statSync(`${directory}\\${fileName}`).isDirectory()
+}
+
+function getValidFiles(directory: string, validFiles: string[]): string[] {
+    let filesAndSubdirectory: string[] = fs.readdirSync(directory);
+    filesAndSubdirectory = filesAndSubdirectory.filter(f => f.endsWith('.xml') || verifySubDirectory(directory, f));
+    const xmlFiles = filesAndSubdirectory.filter(f => f.endsWith('.xml'));
+    const subDirectories = filesAndSubdirectory.filter(f => !f.endsWith('.xml'));
+    validFiles = validFiles.concat(...xmlFiles.map(m => `${directory}\\${m}`));
+
+    subDirectories.forEach((file) => {
+        validFiles = [...getValidFiles(`${directory}\\${file}`, validFiles)];
+    });
+
+    return validFiles;
 }
 
 run();
