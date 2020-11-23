@@ -10,7 +10,7 @@
     "version": {
         "Major": 0,
         "Minor": 1,
-        "Patch": 21
+        "Patch": 22
     },
     "instanceNameFormat": "API Coverage Test",
     "groups": [

@@ -36,6 +36,8 @@ jobs:
         node-version: 10.x
     - name: Install tfx-cli
       run: npm install -g tfx-cli
+    - name: Build Task
+      run: npm run build --prefix ./buildAndReleaseTask 
     - name: Pack Extension
       run: tfx extension create --manifest-globs vss-extension.json --rev-version
     - name: Validation the Extension
