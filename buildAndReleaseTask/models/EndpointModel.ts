@@ -1,4 +1,5 @@
 import { info } from "console";
+import { log } from "../utils/log";
 import { InfoPathModel } from "./InfoPathModel";
 
 export class EndpointModel {
@@ -48,9 +49,9 @@ export class EndpointModel {
         }
     }
 
-    public static log(context: string, endpoints: Array<EndpointModel>): number {
+    public static totalEndpoints(context: string, endpoints: Array<EndpointModel>): number {
         const total = endpoints.reduce((accumulator, current) => accumulator + current.infoPath.length, 0)
-        console.log(`############### ${context}: ${total}`);
+        log(`${context}: ${total}`);
         
         endpoints.forEach((element) => {
             console.log(`Path: ${element.path} | Verbs: ${element.infoPath.map(item => item.verb)}`);

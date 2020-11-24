@@ -1,202 +1,193 @@
-import task = require('azure-pipelines-task-lib/task');
-import https = require('https');
-import { CoverageModel } from './models/CoverageModel';
-import { EndpointModel } from './models/EndpointModel';
-import { InfoPathModel } from './models/InfoPathModel';
-import { WebhookModel } from './models/WebhookModel';
+import task = require("azure-pipelines-task-lib/task");
+import https = require("https");
+import { environment } from "./environments/environment";
+import { CoverageModel } from "./models/CoverageModel";
+import { EndpointModel } from "./models/EndpointModel";
+import { TestType } from "./models/enums/TestType";
+import { InfoPathModel } from "./models/InfoPathModel";
+import { InputDataModel } from "./models/InputDataModel";
+import { WebhookModel } from "./models/WebhookModel";
+import { getValidFiles } from "./utils/directory";
+import { log } from "./utils/log";
+import { endpointsMap, testCaseMap, testSuiteMap } from "./utils/mappers";
 
-const request = require('request');
-const fs = require('fs');
-const xml2js = require('xml2js');
+const request = require("request");
+const fs = require("fs");
+const xml2js = require("xml2js");
 const parser = new xml2js.Parser({ attrkey: "ATTR" });
 
 async function run() {
     try {
-        log('Start coverage process.');
+        log("Start coverage process.");
 
-        let apiUrl: string | undefined = task.getInput('ApiUrl', true);
-        let swaggerJsonPath: string | undefined = task.getInput('SwaggerJsonPath', true);
-        const testResultPath: string | undefined = task.getInput('TestsResultPath', true);
-        const whereIsTheTest: string | undefined = task.getInput('WhereIsTheTest', true);
-        const webhook: string | undefined = task.getInput('Webhook', false);
-        const buildNumber: string | undefined = task.getInput('BuildNumber', true);
-        const applicationName: string | undefined = task.getInput('ApplicationName', true);
+        let inputData: InputDataModel;
 
-        apiUrl = apiUrl?.endsWith('/') ? apiUrl.slice(0, -1) : apiUrl;
-        swaggerJsonPath = swaggerJsonPath?.startsWith('/') ? swaggerJsonPath.substring(1) : swaggerJsonPath;
+        if (environment.production) {
+            inputData = new InputDataModel(
+                task.getInput("ApiUrl", true),
+                task.getInput("SwaggerJsonPath", true),
+                task.getInput("TestsResultPath", true),
+                task.getInput("WhereIsTheTest", true)
+            );
 
-        const url = `${apiUrl}/${swaggerJsonPath}`;
+            inputData.setWebHookData(
+                task.getInput("Webhook", false),
+                task.getInput("BuildNumber", true),
+                task.getInput("ApplicationName", true)
+            );
+        } else {
+            inputData = new InputDataModel(
+                environment.apiUrl,
+                environment.swaggerJsonPath,
+                environment.testResultPath,
+                environment.whereIsTheTest
+            );
 
-        if(!testResultPath) {
-            task.setResult(task.TaskResult.Failed, 'Directory not found.');
-            return;
+            inputData.setWebHookData(
+                environment.webhook,
+                environment.buildNumber,
+                environment.applicationName
+            );
         }
 
-        log(`Reading test result directory: ${testResultPath}`);
-        
+        log(`Reading test result directory: ${inputData.testResultPath}`);
+
         log(`Files found:`);
-        const validFiles = getValidFiles(testResultPath, []);
+        const validFiles = getValidFiles(inputData.testResultPath, []);
         console.log(validFiles);
 
         log(`Reading file: ${validFiles[0]}.`);
         const testResultsFile = fs.readFileSync(validFiles[0], "utf8");
         parser.parseString(testResultsFile, (error: any, result: any) => {
-            if(error) {
-                task.setResult(task.TaskResult.Failed, JSON.stringify(error));
-                return;
+            if (error) {
+                throw error;
             } else {
                 let endpointsTested: Array<EndpointModel> = new Array<EndpointModel>();
                 let endpointsExists: Array<EndpointModel> = new Array<EndpointModel>();
                 let coverage: CoverageModel = new CoverageModel();
 
-                if(whereIsTheTest === 'testSuite') {
-                    log('Reading tests in Test Suite tag.');
-
-                    result.testsuites.testsuite.map((item: any) => {
-                        const testName = item.ATTR.name as string;
-                        const time = item.ATTR.time as number;
-                        const executeAt = item.ATTR.timestamp as Date;
-                        const success = (item.ATTR.failures as number) > 0 ? false : true;
-                        let message: string | undefined;
-
-                        if(!success) {
-                            message = item.testcase[0].failure[0].ATTR.message;
-                        }
-
-                        EndpointModel.setSamePath(endpointsTested, testName, time, executeAt, success, message);
-                    });
+                if (inputData.testType === TestType.TestSuite) {
+                    testSuiteMap(result.testsuites.testsuite, endpointsTested);
                 } else {
-                    log('Reading tests in Test Case tag.');
-
-                    result.testsuites.testsuite.map((item: any) => {
-                        if(item.testcase) {
-                            const executeAt = item.ATTR.timestamp as Date;
-
-                            item.testcase.map((tc: any) => {
-                                const testName = tc.ATTR.classname as string;
-                                const time = tc.ATTR.time as number;
-                                let success: boolean = true;
-                                let message: string | undefined;
-                                
-                                if(tc.failure) {
-                                    success = false;
-                                    message = tc.failure[0].ATTR.message;
-                                }
-                                
-                                EndpointModel.setSamePath(endpointsTested, testName, time, executeAt, success, message);
-                            });
-                        }
-                    });
+                    testCaseMap(result.testsuites.testsuite, endpointsTested);
                 }
 
-                coverage.tested = EndpointModel.log('Endpoints tested', endpointsTested);
+                coverage.tested = EndpointModel.totalEndpoints(
+                    "Endpoints tested",
+                    endpointsTested
+                );
 
-                log(`Reading Swagger of API: ${url}`);
-                request(url, { json: true }, (error: any, response: any, body: any) => {
-                    if(error) {
-                        task.setResult(task.TaskResult.Failed, JSON.stringify(error));
-                    } else if(!error && response.statusCode == 200) {
-                        Object.keys(body.paths).forEach(element => {
-                            let endpoint = new EndpointModel();
-                            endpoint.path = element;
-                            endpoint.infoPath = Object.keys(body.paths[element]).map(el => new InfoPathModel(el?.toUpperCase()))
-                            endpointsExists.push(endpoint);
-                        });
+                log(`Reading Swagger of API: ${inputData.url}`);
+                request(
+                    inputData.url,
+                    { json: true },
+                    (error: any, response: any, body: any) => {
+                        if (error) {
+                            throw error;
+                        } else if (!error && response.statusCode == 200) {
+                            endpointsMap(body, endpointsExists);
 
-                        coverage.existed = EndpointModel.log('Endpoints found', endpointsExists);
+                            coverage.existed = EndpointModel.totalEndpoints(
+                                "Endpoints found",
+                                endpointsExists
+                            );
 
-                        endpointsExists.forEach((item: EndpointModel) => {
-                            let endpoint = endpointsTested.find(fi => fi.path == item.path);
-                            
-                            if(endpoint) {
-                                const verbsInExisted = item.infoPath.map(m => m.verb);
-                                const verbsInTested = endpoint.infoPath.map(m => m.verb);
-                                
-                                const verbsUncover = verbsInExisted.filter(f => !verbsInTested.includes(f));
+                            endpointsExists.forEach((item: EndpointModel) => {
+                                let endpoint = endpointsTested.find(
+                                    (fi) => fi.path == item.path
+                                );
 
-                                if(verbsUncover && verbsUncover.length > 0) {
-                                    endpoint = new EndpointModel();
-                                    endpoint.path = item.path;
-                                    endpoint.infoPath = [...verbsUncover.map(m => new InfoPathModel(m))];
-                                    coverage.uncover.push(endpoint);
+                                if (endpoint) {
+                                    const verbsInExisted = item.infoPath.map(
+                                        (m) => m.verb
+                                    );
+                                    const verbsInTested = endpoint.infoPath.map(
+                                        (m) => m.verb
+                                    );
+
+                                    const verbsUncover = verbsInExisted.filter(
+                                        (f) => !verbsInTested.includes(f)
+                                    );
+
+                                    if (
+                                        verbsUncover &&
+                                        verbsUncover.length > 0
+                                    ) {
+                                        endpoint = new EndpointModel();
+                                        endpoint.path = item.path;
+                                        endpoint.infoPath = [
+                                            ...verbsUncover.map(
+                                                (m) => new InfoPathModel(m)
+                                            ),
+                                        ];
+                                        coverage.uncover.push(endpoint);
+                                    }
+                                } else {
+                                    coverage.uncover.push(item);
                                 }
-                            } else {
-                                coverage.uncover.push(item);
+                            });
+
+                            coverage.coverLog();
+                            coverage.uncoverLog();
+
+                            if (inputData.webhook) {
+                                const payload = new WebhookModel(
+                                    inputData.application ?? "",
+                                    inputData.url ?? "",
+                                    inputData.buildNumber ?? "",
+                                    coverage.existed,
+                                    coverage.tested,
+                                    coverage.getCoverage(),
+                                    endpointsExists,
+                                    endpointsTested,
+                                    coverage.uncover
+                                );
+
+                                const data = JSON.stringify(payload);
+
+                                log("Payload generated:");
+                                console.log(data);
+                                log(`Send to API: ${inputData.webhook}`);
+
+                                var rq = https.request(
+                                    inputData.webhook,
+                                    {
+                                        method: "POST",
+                                        headers: {
+                                            "Content-Type": "application/json",
+                                            "Content-Length": data.length,
+                                        },
+                                    },
+                                    (response) => {
+                                        const statusCode = response.statusCode as number;
+                                        log(
+                                            `StatusCode of request: ${response.statusCode}`
+                                        );
+
+                                        if (
+                                            statusCode >= 200 &&
+                                            statusCode <= 299
+                                        ) {
+                                            log("Request made successfully.");
+                                        } else {
+                                            task.setResult(
+                                                task.TaskResult.Failed,
+                                                "Error to make request"
+                                            );
+                                        }
+                                    }
+                                );
+
+                                rq.write(data);
                             }
-                        });
-
-                        coverage.coverLog();
-                        coverage.uncoverLog();
-
-                        if(webhook) {
-                            const payload = new WebhookModel(
-                                applicationName ?? '',
-                                apiUrl ?? '', 
-                                buildNumber ?? '', 
-                                coverage.existed,
-                                coverage.tested,
-                                coverage.getCoverage(),
-                                endpointsExists,
-                                endpointsTested,
-                                coverage.uncover);
-                            
-                            const data = JSON.stringify(payload);
-
-                            log('Payload generated:');
-                            console.log(data);
-                            log(`Send to API: ${webhook}`);
-
-                            var rq = https.request(
-                                webhook, 
-                                { 
-                                    method: 'POST',
-                                    headers: {
-                                        'Content-Type': 'application/json',
-                                        'Content-Length': data.length
-                                    }
-                                }, (response) => {
-                                    const statusCode = response.statusCode as number;
-                                    log(`StatusCode of request: ${response.statusCode}`);
-
-                                    if(statusCode >= 200 && statusCode <= 299) {
-                                        log('Request made successfully.');
-                                    } else {
-                                        task.setResult(task.TaskResult.Failed, 'Error to make request');
-                                    }
-                                });
-
-                            rq.write(data);
                         }
                     }
-                });
+                );
             }
         });
-    }
-    catch (err) {
+    } catch (err) {
         task.setResult(task.TaskResult.Failed, err.message);
     }
-}
-
-function log(message: string) {
-    console.log(`############### ${message}`);
-}
-
-function verifySubDirectory(directory: string, fileName: string): boolean {
-    return fs.statSync(`${directory}\\${fileName}`).isDirectory()
-}
-
-function getValidFiles(directory: string, validFiles: string[]): string[] {
-    let filesAndSubdirectory: string[] = fs.readdirSync(directory);
-    filesAndSubdirectory = filesAndSubdirectory.filter(f => f.endsWith('.xml') || verifySubDirectory(directory, f));
-    const xmlFiles = filesAndSubdirectory.filter(f => f.endsWith('.xml'));
-    const subDirectories = filesAndSubdirectory.filter(f => !f.endsWith('.xml'));
-    validFiles = validFiles.concat(...xmlFiles.map(m => `${directory}\\${m}`));
-
-    subDirectories.forEach((file) => {
-        validFiles = [...getValidFiles(`${directory}\\${file}`, validFiles)];
-    });
-
-    return validFiles;
 }
 
 run();
