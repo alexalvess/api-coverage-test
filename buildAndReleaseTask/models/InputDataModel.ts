@@ -40,7 +40,7 @@ export class InputDataModel {
         webhook: string | undefined, 
         build: string | undefined, 
         application: string | undefined) => {
-        if(!webhook) {
+        if(!webhook && webhook !== '') {
             const errors = webhookValidation(build, application);
             if(errors.length > 0) {
                 throw new Error(JSON.stringify(errors));
