@@ -1,3 +1,4 @@
+import { log } from "../utils/log";
 import { EndpointModel } from "./EndpointModel";
 
 export class CoverageModel {
@@ -22,13 +23,13 @@ export class CoverageModel {
 
     public coverLog(): void {
         this.coverage = (this.tested * 100) / this.existed;
-        console.log(`############### Coverage: ${this.coverage} %`);
+        log(`Coverage: ${this.coverage} %`);
     }
 
     public uncoverLog(): void {
         this.totalUncover = this.uncover.reduce((accumulator, current) => accumulator + current.infoPath.length, 0);
 
-        console.log(`############### Uncover endpoints: ${this.totalUncover}`);
+        log(`Uncover endpoints: ${this.totalUncover}`);
         this.uncover.forEach(item => {
             console.log(`Path: ${item.path} | Verbs: ${item.infoPath.map(m => m.verb)}`);
         });

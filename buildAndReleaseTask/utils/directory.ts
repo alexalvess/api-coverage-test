@@ -1,6 +1,6 @@
 import fs = require('fs');
 
-function verifySubDirectory(directory: string, fileName: string): boolean {
+export function verifySubDirectory(directory: string, fileName: string): boolean {
     return fs.statSync(`${directory}\\${fileName}`).isDirectory();
 }
 

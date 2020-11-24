@@ -1,19 +1,17 @@
-import task = require("azure-pipelines-task-lib/task");
-import https = require("https");
 import { environment } from "./environments/environment";
 import { CoverageModel } from "./models/CoverageModel";
 import { EndpointModel } from "./models/EndpointModel";
 import { TestType } from "./models/enums/TestType";
-import { InfoPathModel } from "./models/InfoPathModel";
 import { InputDataModel } from "./models/InputDataModel";
-import { WebhookModel } from "./models/WebhookModel";
 import { getValidFiles } from "./utils/directory";
 import { log } from "./utils/log";
 import { endpointsMap, testCaseMap, testSuiteMap } from "./utils/mappers";
+import { findUncoverEndpoints, generateWebhookPayload, makeRequest } from "./utils/operations";
+import * as Request from "request";
 
-const request = require("request");
-const fs = require("fs");
 const xml2js = require("xml2js");
+const fs = require("fs");
+const task = require("azure-pipelines-task-lib/task");
 const parser = new xml2js.Parser({ attrkey: "ATTR" });
 
 async function run() {
@@ -78,7 +76,7 @@ async function run() {
                 );
 
                 log(`Reading Swagger of API: ${inputData.url}`);
-                request(
+                Request.get(
                     inputData.url,
                     { json: true },
                     (error: any, response: any, body: any) => {
@@ -92,93 +90,14 @@ async function run() {
                                 endpointsExists
                             );
 
-                            endpointsExists.forEach((item: EndpointModel) => {
-                                let endpoint = endpointsTested.find(
-                                    (fi) => fi.path == item.path
-                                );
-
-                                if (endpoint) {
-                                    const verbsInExisted = item.infoPath.map(
-                                        (m) => m.verb
-                                    );
-                                    const verbsInTested = endpoint.infoPath.map(
-                                        (m) => m.verb
-                                    );
-
-                                    const verbsUncover = verbsInExisted.filter(
-                                        (f) => !verbsInTested.includes(f)
-                                    );
-
-                                    if (
-                                        verbsUncover &&
-                                        verbsUncover.length > 0
-                                    ) {
-                                        endpoint = new EndpointModel();
-                                        endpoint.path = item.path;
-                                        endpoint.infoPath = [
-                                            ...verbsUncover.map(
-                                                (m) => new InfoPathModel(m)
-                                            ),
-                                        ];
-                                        coverage.uncover.push(endpoint);
-                                    }
-                                } else {
-                                    coverage.uncover.push(item);
-                                }
-                            });
-
+                            coverage.uncover = findUncoverEndpoints(endpointsExists, endpointsTested);
+                            
                             coverage.coverLog();
                             coverage.uncoverLog();
 
                             if (inputData.webhook) {
-                                const payload = new WebhookModel(
-                                    inputData.application ?? "",
-                                    inputData.url ?? "",
-                                    inputData.buildNumber ?? "",
-                                    coverage.existed,
-                                    coverage.tested,
-                                    coverage.getCoverage(),
-                                    endpointsExists,
-                                    endpointsTested,
-                                    coverage.uncover
-                                );
-
-                                const data = JSON.stringify(payload);
-
-                                log("Payload generated:");
-                                console.log(data);
-                                log(`Send to API: ${inputData.webhook}`);
-
-                                var rq = https.request(
-                                    inputData.webhook,
-                                    {
-                                        method: "POST",
-                                        headers: {
-                                            "Content-Type": "application/json",
-                                            "Content-Length": data.length,
-                                        },
-                                    },
-                                    (response) => {
-                                        const statusCode = response.statusCode as number;
-                                        log(
-                                            `StatusCode of request: ${response.statusCode}`
-                                        );
-
-                                        if (
-                                            statusCode >= 200 &&
-                                            statusCode <= 299
-                                        ) {
-                                            log("Request made successfully.");
-                                        } else {
-                                            task.setResult(
-                                                task.TaskResult.Failed,
-                                                "Error to make request"
-                                            );
-                                        }
-                                    }
-                                );
-
-                                rq.write(data);
+                                const payload = generateWebhookPayload(inputData, coverage, endpointsExists, endpointsTested);
+                                makeRequest(payload, inputData.webhook);
                             }
                         }
                     }

@@ -20,7 +20,7 @@ jobs:
     - name: Install Dependencies
       run: npm install --prefix ./buildAndReleaseTask package.json
     - name: Build Task
-      run: npm run build --prefix ./buildAndReleaseTask
+      run: npm run build:prd --prefix ./buildAndReleaseTask
     - name: Upload build results
       uses: actions/upload-artifact@v2
       with:

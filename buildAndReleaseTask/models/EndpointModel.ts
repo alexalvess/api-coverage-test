@@ -1,4 +1,3 @@
-import { info } from "console";
 import { log } from "../utils/log";
 import { InfoPathModel } from "./InfoPathModel";
 
