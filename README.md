@@ -4,7 +4,7 @@ This project is a custom task that you can include in your pipeline on Azure Dev
 According to the JSON file of Swagger of API and the JUnit file result test, it is made a from-to both files and generates a tests coverage percent.
 
 ## The flow
-![Flow](https://raw.githubusercontent.com/alexalvess/api-coverage-test/master/images/flow.png)
+![Flow](https://raw.githubusercontent.com/alexalvess/api-coverage-test/master/images/flow.png) 
 
 ## How to use 📚
 Before everything, we have to align how can we "construct" our test, following some guides:
@@ -108,3 +108,11 @@ This custom task was developed by [Alex Alves](https://www.linkedin.com/in/alexa
 ---
 
 ## FAQ
+- What do you need of Swagger? 
+Swagger is a tool that allows you to document your API, exposing the paths, verbs, and models.
+- What report templates is supported?
+For now, only supports the JUnit report format.
+- Why do you have the option of webhook?
+For you send the result for an API and after treatment the data the way that you want. For example, if you want to do a timeline, you can store all data in a database and build a frontend to show this timeline or graph, or show only the critical results.
+- When do I need to use this?
+When you want to see the test coverage of your API endpoints.

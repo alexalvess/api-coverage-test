@@ -9,7 +9,7 @@ on:
 jobs:
   build:
   
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
 
     steps:
     - uses: actions/checkout@v2
@@ -20,13 +20,19 @@ jobs:
     - name: Install Dependencies
       run: npm install --prefix ./buildAndReleaseTask package.json
     - name: Build Task
-      run: npm run build --prefix ./buildAndReleaseTask 
+      run: npm run build:prd --prefix ./buildAndReleaseTask
+    - name: Upload build results
+      uses: actions/upload-artifact@v2
+      with:
+        name: buildResults
+        path: dist
+        if-no-files-found: error
 
   pack-publish:
     if: github.base_ref == false
     needs: [build]
 
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
 
     steps:
     - uses: actions/checkout@v2
@@ -34,6 +40,11 @@ jobs:
       uses: actions/setup-node@v1
       with:
         node-version: 10.x
+    - name: Download build results
+      uses: actions/download-artifact@v2
+      with:
+        name: buildResults
+        path: dist
     - name: Install tfx-cli
       run: npm install -g tfx-cli
     - name: Pack Extension
@@ -41,12 +52,10 @@ jobs:
     - name: Validation the Extension
       run: tfx extension isvalid --publisher ${{ secrets.VS_MARKET_PLACE_PUBLISHER }} --extension-id ${{ secrets.VS_MARKET_PLACE_EXTENSION_ID }} --token ${{ secrets.VS_MARKET_PLACE_TOKEN }}
     - name: Update VSS Extension File
-      if: github.ref == 'homologation'
       uses: test-room-7/action-update-file@v1
       with:
         file-path: vss-extension.json
         commit-msg: Update resources
         github-token: ${{ secrets.GITHUB_TOKEN }}
     - name: Publish Extension
-      if: github.ref == 'master'
       run: tfx extension publish --manifest-globs --token ${{ secrets.VS_MARKET_PLACE_TOKEN }}

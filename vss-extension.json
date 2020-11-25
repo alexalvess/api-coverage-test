@@ -2,7 +2,7 @@
     "manifestVersion": 1,
     "id": "task-702d7430-c3a9-422a-87f2-569ed16ba6be",
     "name": "Coverage API Test",
-    "version": "0.0.83",
+    "version": "0.0.87",
     "publisher": "AlexAlves",
     "targets": [
         {
@@ -17,6 +17,7 @@
         "color": "rgb(224, 247, 246)",
         "theme": "light"
     },
+    "public": true,
     "tags": [
         "test",
         "integration test",
@@ -34,7 +35,7 @@
     },
     "files": [
         {
-            "path": "buildAndReleaseTask"
+            "path": "dist"
         }
     ],
     "repository": {
@@ -49,7 +50,7 @@
                 "ms.vss-distributed-task.tasks"
             ],
             "properties": {
-                "name": "buildAndReleaseTask"
+                "name": "dist"
             }
         }
     ]
