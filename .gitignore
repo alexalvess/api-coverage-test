@@ -1,6 +1,9 @@
 # JS files
 *.js
 
+# task files
+*.taskkey
+
 # Logs
 logs
 *.log
