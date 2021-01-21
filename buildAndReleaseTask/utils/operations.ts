@@ -62,12 +62,12 @@ export function generateWebhookPayload(
 
     log("Payload generated:");
     console.log(data);
-    log(`Send to API: ${inputData.webhook}`);
 
     return data;
 }
 
 export function makeRequest(payload: any, url: string): void {
+    log(`Send to API: ${url}`);
     const instance = axios.create({
         httpsAgent: new https.Agent({  
             rejectUnauthorized: false
