@@ -5,6 +5,7 @@ import { InputDataModel } from "../models/InputDataModel";
 import { WebhookModel } from "../models/WebhookModel";
 import { log } from "./log";
 import https = require("https");
+const axios = require('axios');
 
 export function findUncoverEndpoints(
     endpointsExists: EndpointModel[],
@@ -67,31 +68,20 @@ export function generateWebhookPayload(
 }
 
 export function makeRequest(payload: any, url: string): void {
-    var rq = https.request(
-        url,
-        {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                "Content-Length": payload.length,
-            },
-        },
-        (response) => {
-            const statusCode = response.statusCode as number;
-            log(
-                `StatusCode of request: ${response.statusCode}`
-            );
+    const instance = axios.create({
+        httpsAgent: new https.Agent({  
+            rejectUnauthorized: false
+        }),
+        headers: {'content-type': 'application/json'}
+    });
 
-            if (
-                statusCode >= 200 &&
-                statusCode <= 299
-            ) {
-                log("Request made successfully.");
-            } else {
-                throw new Error('Error to make request');
-            }
-        }
-    );
-
-    rq.write(payload);
+    instance.post(url, payload)
+        .then(() => {
+            log("Request made successfully.");
+        })
+        .catch((error: any) => {
+            log("Error: ");
+            console.log(error);
+            throw new Error('Error to make request');
+    });
 }

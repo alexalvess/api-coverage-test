@@ -97,7 +97,11 @@ async function run() {
 
                             if (inputData.webhook) {
                                 const payload = generateWebhookPayload(inputData, coverage, endpointsExists, endpointsTested);
-                                makeRequest(payload, inputData.webhook);
+
+                                inputData.webhook.forEach(url => {
+                                    makeRequest(payload, url);
+                                });
+
                             }
                         }
                     }
