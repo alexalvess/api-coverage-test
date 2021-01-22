@@ -32,7 +32,7 @@ Now that we build our test, let's see below. This is the window of Custom Task i
 - Api url: the url referring your API, like *[https://aurora-project.azurewebsites.net/]*
 - Path of Swagger's JSON: the path where is located the json of API's Swagger, like *[/swagger/v1/swagger.json]*
 - Test Result Path: the path where is located the junit file, which contains the tests result, like *[$(System.DefaultWorkingDirectory)\Results\junitReport.xml]*
-- Webhook: the URL that the result of the coverage process will be sent by the custom task
+- Webhook: you can inform multiple URL (separate with ";") the which the result of the coverage process will be sent by the custom task
 
 The other both options we will talk more specifically.
 
