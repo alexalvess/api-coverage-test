@@ -15,9 +15,8 @@
   "author": "AlexAlves",
   "license": "ISC",
   "dependencies": {
-    "@types/request": "^2.48.5",
-    "azure-pipelines-task-lib": "^3.0.6-preview.0",
-    "request": "^2.88.2"
+    "axios": "^0.21.1",
+    "azure-pipelines-task-lib": "^3.0.6-preview.0"
   },
   "devDependencies": {
     "@types/node": "^14.14.6",

@@ -6,7 +6,7 @@ export class InputDataModel {
     url: string;
     testResultPath: string;
     testType: TestType;
-    webhook: string | undefined;
+    webhook: Array<string> | undefined;
     buildNumber: string | undefined;
     application: string | undefined;
 
@@ -40,13 +40,13 @@ export class InputDataModel {
         webhook: string | undefined, 
         build: string | undefined, 
         application: string | undefined) => {
-        if(!webhook && webhook !== '') {
+        if(webhook && webhook !== '') {
             const errors = webhookValidation(build, application);
             if(errors.length > 0) {
                 throw new Error(JSON.stringify(errors));
             }
 
-            this.webhook = webhook;
+            this.webhook = webhook?.split(';');
             this.buildNumber = build;
             this.application = application;
         }

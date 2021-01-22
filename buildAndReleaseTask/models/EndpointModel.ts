@@ -11,7 +11,7 @@ export class EndpointModel {
     }
 
     public addInfoPath (verb: string, time: number, executeAt: Date, success: boolean, message: string | undefined): void {
-        if(!this.infoPath.find(f => f.verb === verb.toUpperCase())) {
+        if(verb && !this.infoPath.find(f => f.verb === verb.toUpperCase())) {
             const infoPath = new InfoPathModel(verb.toUpperCase());
             infoPath.time = time;
             infoPath.executeAt = executeAt;
