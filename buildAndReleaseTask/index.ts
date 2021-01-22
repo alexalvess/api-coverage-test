@@ -6,8 +6,7 @@ import { InputDataModel } from "./models/InputDataModel";
 import { getValidFiles } from "./utils/directory";
 import { log } from "./utils/log";
 import { endpointsMap, testCaseMap, testSuiteMap } from "./utils/mappers";
-import { findUncoverEndpoints, generateWebhookPayload, makeRequest } from "./utils/operations";
-import * as Request from "request";
+import { findUncoverEndpoints, generateWebhookPayload, makePostRequest, makeGetRequest } from "./utils/operations";
 
 const xml2js = require("xml2js");
 const fs = require("fs");
@@ -76,36 +75,28 @@ async function run() {
                 );
 
                 log(`Reading Swagger of API: ${inputData.url}`);
-                Request.get(
-                    inputData.url,
-                    { json: true },
-                    (error: any, response: any, body: any) => {
-                        if (error) {
-                            throw error;
-                        } else if (!error && response.statusCode == 200) {
-                            endpointsMap(body, endpointsExists);
+                makeGetRequest(inputData.url)
+                    .then((response: any) => {
+                        endpointsMap(response.data, endpointsExists);
 
-                            coverage.existed = EndpointModel.totalEndpoints(
-                                "Endpoints found",
-                                endpointsExists
-                            );
+                        coverage.existed = EndpointModel.totalEndpoints(
+                            "Endpoints found",
+                            endpointsExists
+                        );
 
-                            coverage.uncover = findUncoverEndpoints(endpointsExists, endpointsTested);
+                        coverage.uncover = findUncoverEndpoints(endpointsExists, endpointsTested);
                             
-                            coverage.coverLog();
-                            coverage.uncoverLog();
+                        coverage.coverLog();
+                        coverage.uncoverLog();
 
-                            if (inputData.webhook) {
-                                const payload = generateWebhookPayload(inputData, coverage, endpointsExists, endpointsTested);
-
-                                inputData.webhook.forEach(url => {
-                                    makeRequest(payload, url);
-                                });
-
-                            }
+                        if (inputData.webhook) {
+                            const payload = generateWebhookPayload(inputData, coverage, endpointsExists, endpointsTested);
+                            inputData.webhook.forEach(url => makePostRequest(payload, url));
                         }
-                    }
-                );
+                    })
+                    .catch((error) => {
+                        throw error;
+                    });
             }
         });
     } catch (err) {

@@ -66,7 +66,7 @@ export function generateWebhookPayload(
     return data;
 }
 
-export function makeRequest(payload: any, url: string): void {
+export function makePostRequest(payload: any, url: string): void {
     log(`Send to API: ${url}`);
     const instance = axios.create({
         httpsAgent: new https.Agent({  
@@ -84,4 +84,16 @@ export function makeRequest(payload: any, url: string): void {
             console.log(error);
             throw new Error('Error to make request');
     });
+}
+
+export function makeGetRequest(url: string): Promise<any> {
+    log(`Send to API: ${url}`);
+    const instance = axios.create({
+        httpsAgent: new https.Agent({  
+            rejectUnauthorized: false
+        }),
+        headers: {'content-type': 'application/json'}
+    });
+
+    return instance.get(url);
 }
