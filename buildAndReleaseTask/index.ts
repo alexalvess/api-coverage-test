@@ -6,7 +6,12 @@ import { InputDataModel } from "./models/InputDataModel";
 import { getValidFiles } from "./utils/directory";
 import { log } from "./utils/log";
 import { endpointsMap, testCaseMap, testSuiteMap } from "./utils/mappers";
-import { findUncoverEndpoints, generateWebhookPayload, makePostRequest, makeGetRequest } from "./utils/operations";
+import {
+    findUncoverEndpoints,
+    generateWebhookPayload,
+    makePostRequest,
+    makeGetRequest,
+} from "./utils/operations";
 
 const xml2js = require("xml2js");
 const fs = require("fs");
@@ -53,55 +58,71 @@ async function run() {
         const validFiles = getValidFiles(inputData.testResultPath, []);
         console.log(validFiles);
 
-        log(`Reading file: ${validFiles[0]}.`);
-        const testResultsFile = fs.readFileSync(validFiles[0], "utf8");
-        parser.parseString(testResultsFile, (error: any, result: any) => {
-            if (error) {
-                throw error;
-            } else {
-                let endpointsTested: Array<EndpointModel> = new Array<EndpointModel>();
-                let endpointsExists: Array<EndpointModel> = new Array<EndpointModel>();
-                let coverage: CoverageModel = new CoverageModel();
-
-                if (inputData.testType === TestType.TestSuite) {
-                    testSuiteMap(result.testsuites.testsuite, endpointsTested);
-                } else {
-                    testCaseMap(result.testsuites.testsuite, endpointsTested);
-                }
-
-                coverage.tested = EndpointModel.totalEndpoints(
-                    "Endpoints tested",
-                    endpointsTested
-                );
-
-                log(`Reading Swagger of API: ${inputData.url}`);
-                makeGetRequest(inputData.url)
-                    .then((response: any) => {
-                        endpointsMap(response.data, endpointsExists);
-
-                        coverage.existed = EndpointModel.totalEndpoints(
-                            "Endpoints found",
-                            endpointsExists
-                        );
-
-                        coverage.uncover = findUncoverEndpoints(endpointsExists, endpointsTested);
-                            
-                        coverage.coverLog();
-                        coverage.uncoverLog();
-
-                        if (inputData.webhook) {
-                            const payload = generateWebhookPayload(inputData, coverage, endpointsExists, endpointsTested);
-                            inputData.webhook.forEach(url => makePostRequest(payload, url));
-                        }
-                    })
-                    .catch((error) => {
-                        throw error;
-                    });
-            }
+        validFiles.forEach((file) => {
+            processAnalysis(file, inputData);
         });
     } catch (err) {
         task.setResult(task.TaskResult.Failed, err.message);
     }
+}
+
+async function processAnalysis(file: string, inputData: InputDataModel) {
+    log(`Reading file: ${file}.`);
+    const testResultsFile = fs.readFileSync(file, "utf8");
+    parser.parseString(testResultsFile, (error: any, result: any) => {
+        if (error) {
+            throw error;
+        } else {
+            let endpointsTested: Array<EndpointModel> = new Array<EndpointModel>();
+            let endpointsExists: Array<EndpointModel> = new Array<EndpointModel>();
+            let coverage: CoverageModel = new CoverageModel();
+
+            if (inputData.testType === TestType.TestSuite) {
+                testSuiteMap(result.testsuites.testsuite, endpointsTested);
+            } else {
+                testCaseMap(result.testsuites.testsuite, endpointsTested);
+            }
+
+            coverage.tested = EndpointModel.totalEndpoints(
+                "Endpoints tested",
+                endpointsTested
+            );
+
+            log(`Reading Swagger of API: ${inputData.url}`);
+            makeGetRequest(inputData.url)
+                .then((response: any) => {
+                    endpointsMap(response.data, endpointsExists);
+
+                    coverage.existed = EndpointModel.totalEndpoints(
+                        "Endpoints found",
+                        endpointsExists
+                    );
+
+                    coverage.uncover = findUncoverEndpoints(
+                        endpointsExists,
+                        endpointsTested
+                    );
+
+                    coverage.coverLog();
+                    coverage.uncoverLog();
+
+                    if (inputData.webhook) {
+                        const payload = generateWebhookPayload(
+                            inputData,
+                            coverage,
+                            endpointsExists,
+                            endpointsTested
+                        );
+                        inputData.webhook.forEach((url) =>
+                            makePostRequest(payload, url)
+                        );
+                    }
+                })
+                .catch((error) => {
+                    throw error;
+                });
+        }
+    });
 }
 
 run();
