@@ -29,7 +29,8 @@ async function run() {
                 task.getInput("ApiUrl", true),
                 task.getInput("SwaggerJsonPath", true),
                 task.getInput("TestsResultPath", true),
-                task.getInput("WhereIsTheTest", true)
+                task.getInput("WhereIsTheTest", true),
+                task.getInput("MinimumQualityGate", true)
             );
 
             inputData.setWebHookData(
@@ -42,7 +43,8 @@ async function run() {
                 environment.apiUrl,
                 environment.swaggerJsonPath,
                 environment.testResultPath,
-                environment.whereIsTheTest
+                environment.whereIsTheTest,
+                environment.minimumQualityGate
             );
 
             inputData.setWebHookData(
@@ -116,6 +118,10 @@ async function processAnalysis(file: string, inputData: InputDataModel) {
                         inputData.webhook.forEach((url) =>
                             makePostRequest(payload, url)
                         );
+                    }
+
+                    if(inputData.minimumQualityGate > coverage.coverage) {
+                        throw new Error("You have not reached the minimum coverage percentage.");
                     }
                 })
                 .catch((error) => {
