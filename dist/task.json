@@ -1,0 +1,99 @@
+{
+  "$schema": "https://raw.githubusercontent.com/Microsoft/azure-pipelines-task-lib/master/tasks.schema.json",
+  "id": "702d7430-c3a9-422a-87f2-569ed16ba6be",
+  "name": "APICoverageTest",
+  "friendlyName": "API Coverage Test",
+  "description": "Test coverage according to tested endpoints and what's in the swagger. Only support for JUnit test format.",
+  "helpMarkDown": "",
+  "category": "Test",
+  "author": "Alex Alves",
+  "version": {
+    "Major": 0,
+    "Minor": 1,
+    "Patch": 26
+  },
+  "instanceNameFormat": "API Coverage Test",
+  "groups": [
+    {
+      "name": "WebhookGroup",
+      "displayName": "Webhook",
+      "isExpanded": false
+    }
+  ],
+  "inputs": [
+    {
+      "name": "ApiUrl",
+      "type": "string",
+      "label": "Api url",
+      "defaultValue": "",
+      "required": true,
+      "helpMarkDown": "For example: https://{url}/"
+    },
+    {
+      "name": "SwaggerJsonPath",
+      "type": "string",
+      "label": "PATH to JSON of Swagger",
+      "defaultValue": "",
+      "required": true,
+      "helpMarkDown": "For example: swagger/{version}/swagger.json"
+    },
+    {
+      "name": "TestsResultPath",
+      "type": "string",
+      "label": "Tests Result Path",
+      "defaultValue": "$(System.DefaultWorkingDirectory)",
+      "required": true,
+      "helpMarkDown": "Output path where the test result are available."
+    },
+    {
+      "name": "WhereIsTheTest",
+      "type": "radio",
+      "label": "Where is the tests name",
+      "required": true,
+      "defaultValue": "testSuite",
+      "helpMarkDown": "Choose which tag shows the details of the test (path and verb) in the generated XML. In POSTMAN it is generated in Test Suite, and in applications made in JS it is generated in Test Case.",
+      "options": {
+        "testSuite": "Test Suite",
+        "testCase": "Test Case"
+      }
+    },
+    {
+      "name": "MinimumQualityGate",
+      "type": "int",
+      "label": "Minimum Quality Gate Percentage",
+      "defaultValue": "0",
+      "required": true
+    },
+    {
+      "name": "Webhook",
+      "type": "string",
+      "label": "Webhooks",
+      "required": false,
+      "defaultValue": "",
+      "helpMarkDown": "Inform the endpoints that will receive a payload's coverage result. Separate with ';'",
+      "groupName": "WebhookGroup"
+    },
+    {
+      "name": "ApplicationName",
+      "type": "string",
+      "label": "Application Name",
+      "defaultValue": "",
+      "required": false,
+      "helpMarkDown": "Your project name",
+      "groupName": "WebhookGroup"
+    },
+    {
+      "name": "BuildNumber",
+      "type": "string",
+      "label": "Build Number",
+      "defaultValue": "$(Build.BuildNumber)",
+      "required": false,
+      "groupName": "WebhookGroup"
+    }
+  ],
+  "execution": {
+    "Node10": {
+      "target": "index.js"
+    }
+  }
+}
