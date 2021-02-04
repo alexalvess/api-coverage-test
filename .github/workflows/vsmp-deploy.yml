@@ -19,6 +19,10 @@ jobs:
         node-version: 10.x
     - name: Install Dependencies
       run: npm install --prefix ./buildAndReleaseTask package.json
+    - name: Install Json tools
+      run: npm install -g json
+    - name: Modify Task version
+      run: json -I -f ./buildAndReleaseTask/task.json -e "this.version.Patch++"
     - name: Build Task
       run: npm run build:prd --prefix ./buildAndReleaseTask
     - name: Upload build results
@@ -54,7 +58,9 @@ jobs:
     - name: Update VSS Extension File
       uses: test-room-7/action-update-file@v1
       with:
-        file-path: vss-extension.json
+        file-path: |
+          vss-extension.json
+          buildAndReleaseTask/task.json
         commit-msg: Update resources
         github-token: ${{ secrets.GITHUB_TOKEN }}
     - name: Publish Extension

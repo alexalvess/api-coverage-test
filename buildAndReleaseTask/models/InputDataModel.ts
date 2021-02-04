@@ -6,6 +6,7 @@ export class InputDataModel {
     url: string;
     testResultPath: string;
     testType: TestType;
+    minimumQualityGate: number;
     webhook: Array<string> | undefined;
     buildNumber: string | undefined;
     application: string | undefined;
@@ -14,8 +15,11 @@ export class InputDataModel {
         apiUrl: string | undefined, 
         swaggerPath: string | undefined,
         testResultPath: string | undefined,
-        testType: string | undefined) {
+        testType: string | undefined,
+        minimumQualityGate: number | undefined) {
     
+        this.minimumQualityGate = minimumQualityGate ?? 0;
+
         const errors = inputBasicValidation(apiUrl, swaggerPath, testResultPath);
         if(errors.length > 0) {
             throw new Error(JSON.stringify(errors));
