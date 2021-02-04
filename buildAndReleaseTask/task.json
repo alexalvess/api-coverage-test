@@ -10,7 +10,7 @@
     "version": {
         "Major": 0,
         "Minor": 1,
-        "Patch": 25
+        "Patch": 26
     },
     "instanceNameFormat": "API Coverage Test",
     "groups": [
@@ -56,6 +56,13 @@
                 "testSuite": "Test Suite",
                 "testCase": "Test Case"
             }
+        },
+        {
+            "name": "MinimumQualityGate",
+            "type": "int",
+            "label": "Minimum Quality Gate Percentage",
+            "defaultValue": "0",
+            "required": true
         },
         {
             "name": "Webhook",
