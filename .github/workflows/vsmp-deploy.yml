@@ -60,7 +60,7 @@ jobs:
       with:
         file-path: |
           vss-extension.json
-          dist/task.json
+          buildAndReleaseTask/task.json
         commit-msg: Update resources
         github-token: ${{ secrets.GITHUB_TOKEN }}
     - name: Publish Extension
