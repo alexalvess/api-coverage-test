@@ -58,6 +58,13 @@
             }
         },
         {
+            "name": "MinimumQualityGate",
+            "type": "int",
+            "label": "Minimum Quality Gate Percentage",
+            "defaultValue": "0",
+            "required": true
+        },
+        {
             "name": "Webhook",
             "type": "string",
             "label": "Webhooks",

@@ -4,7 +4,8 @@ export const environment = {
     swaggerJsonPath: '/swagger/v1/swagger.json',
     testResultPath: 'C:\\Users\\alexa\\Downloads',
     whereIsTheTest: 'testSuite',
-    webhook: 'https://localhost:44308/api/users/TestWebhook;https://localhost:44308/api/users/TestWebhook1',
+    webhook: '',
     buildNumber: '123456',
-    applicationName: 'Teste'
+    applicationName: 'Teste',
+    minimumQualityGate: 0
 }
