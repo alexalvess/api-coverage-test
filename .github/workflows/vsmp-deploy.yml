@@ -18,7 +18,7 @@ jobs:
 
     name: Build
 
-    runs-on: ${{ env.machine }}
+    runs-on: ${{ machine }}
 
     steps:
     - name: Use GitHub Actions
@@ -26,7 +26,7 @@ jobs:
     - name: Use Node 10.x
       uses: actions/setup-node@v1
       with:
-        node-version: ${{ env.nodeVersion }}
+        node-version: ${{ nodeVersion }}
     - name: Install Dependencies
       run: npm install --prefix ./buildAndReleaseTask package.json
     - name: Build Task
@@ -39,7 +39,7 @@ jobs:
 
     needs: build
 
-    runs-on: ${{ env.machine }}
+    runs-on: ${{ machine }}
 
     steps:
     - name: Use GitHub Actions
@@ -47,14 +47,14 @@ jobs:
     - name: Use Node 10.x
       uses: actions/setup-node@v1
       with:
-        node-version: ${{ env.nodeVersion }}
+        node-version: ${{ nodeVersion }}
 
   publish:
     name: Pack and Publish
 
     needs: [build, artifact]
 
-    runs-on: ${{ env.machine }}
+    runs-on: ${{ machine }}
 
     steps:
     - name: Use GitHub Actions
@@ -62,4 +62,4 @@ jobs:
     - name: Use Node 10.x
       uses: actions/setup-node@v1
       with:
-        node-version: ${{ env.nodeVersion }}
+        node-version: ${{ nodeVersion }}
