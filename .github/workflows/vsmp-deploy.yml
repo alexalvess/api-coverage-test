@@ -12,8 +12,6 @@ on:
 
 jobs:
   build:
-    if: github.base_ref == 'refs/heads/master'
-
     name: Build
 
     runs-on: ${{ matrix.os }}
@@ -24,6 +22,12 @@ jobs:
         node: [ 10.x ]
 
     steps:
+    - name: Step that prints name of pull request's base branch
+      run: |
+        echo "Pull request's base branch is: ${BASE_BRANCH}"
+      env:
+        BASE_BRANCH: ${{ github.base_ref }}
+      if: github.event_name == 'pull_request'
     - name: Use GitHub Actions
       uses: actions/checkout@v2
     - name: Use Node 10.x
@@ -39,6 +43,9 @@ jobs:
     if: github.event_name == 'push' && github.ref != 'refs/heads/master'
 
     name: Generate Artifact
+
+    environment:
+      name: artifact
 
     runs-on: ${{ matrix.os }}
 
