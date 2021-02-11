@@ -8,10 +8,11 @@ on:
   pull_request:
     branches:
     - 'master'
+    - 'releases/**'
 
 jobs:
   build:
-    if: ${{ github.ref == 'refs/heads/master' }}
+    if: github.ref == 'refs/heads/master' || github.base_ref == 'refs/heads/master'
 
     name: Build
 
@@ -35,7 +36,7 @@ jobs:
       run: npm run build --prefix ./buildAndReleaseTask
 
   artifact:
-    if: ${{ github.ref != 'refs/heads/master' }}
+    if: github.event_name == 'push' && github.ref != 'refs/heads/master'
 
     name: Generate Artifact
 
