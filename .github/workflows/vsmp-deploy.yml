@@ -57,6 +57,8 @@ jobs:
       run: tfx extension isvalid --publisher ${{ secrets.VS_MARKET_PLACE_PUBLISHER }} --extension-id ${{ secrets.VS_MARKET_PLACE_EXTENSION_ID }} --token ${{ secrets.VS_MARKET_PLACE_TOKEN }}
     - name: Update VSS Extension File
       uses: test-room-7/action-update-file@v1
+    - name: Copy task file
+      script: copy .\dist\task.json .\buildAndReleaseTask
       with:
         file-path: |
           vss-extension.json
