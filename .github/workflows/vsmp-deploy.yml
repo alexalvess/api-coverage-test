@@ -31,7 +31,7 @@ jobs:
     - name: Install Dependencies
       run: npm install --prefix ./buildAndReleaseTask package.json
     - name: Build Task
-      run: tsc
+      run: npm run build
 
   artifact:
     if: github.event_name == 'release'
