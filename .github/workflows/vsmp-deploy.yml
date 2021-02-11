@@ -2,68 +2,64 @@ name: VS Market Place Deploy
 
 on:
   push:
-    branches: [ master, homologation ] 
   pull_request:
     branches: [ master ]
+  release:
+    types:
+      - created
+
+env:
+  machine: windows-latest
+  nodeVersion: 10.x
 
 jobs:
   build:
-  
-    runs-on: windows-latest
+    if: github.event_name == push || github.event_name == pull_request
+
+    name: Build
+
+    runs-on: ${{ env.machine }}
 
     steps:
-    - uses: actions/checkout@v2
+    - name: Use GitHub Actions
+      uses: actions/checkout@v2
     - name: Use Node 10.x
       uses: actions/setup-node@v1
       with:
-        node-version: 10.x
+        node-version: ${{ env.nodeVersion }}
     - name: Install Dependencies
       run: npm install --prefix ./buildAndReleaseTask package.json
-    - name: Install Json tools
-      run: npm install -g json
-    - name: Modify Task version
-      run: json -I -f ./buildAndReleaseTask/task.json -e "this.version.Patch++"
     - name: Build Task
       run: npm run build:prd --prefix ./buildAndReleaseTask
-    - name: Upload build results
-      uses: actions/upload-artifact@v2
-      with:
-        name: buildResults
-        path: dist
-        if-no-files-found: error
 
-  pack-publish:
-    if: github.base_ref == false
-    needs: [build]
+  artifact:
+    if: github.event_name == create
 
-    runs-on: windows-latest
+    name: Generate Artifact
+
+    needs: build
+
+    runs-on: ${{ env.machine }}
 
     steps:
-    - uses: actions/checkout@v2
+    - name: Use GitHub Actions
+      uses: actions/checkout@v2
     - name: Use Node 10.x
       uses: actions/setup-node@v1
       with:
-        node-version: 10.x
-    - name: Download build results
-      uses: actions/download-artifact@v2
+        node-version: ${{ env.nodeVersion }}
+
+  publish:
+    name: Pack and Publish
+
+    needs: [build, artifact]
+
+    runs-on: ${{ env.machine }}
+
+    steps:
+    - name: Use GitHub Actions
+      uses: actions/checkout@v2
+    - name: Use Node 10.x
+      uses: actions/setup-node@v1
       with:
-        name: buildResults
-        path: dist
-    - name: Install tfx-cli
-      run: npm install -g tfx-cli
-    - name: Pack Extension
-      run: tfx extension create --manifest-globs vss-extension.json --rev-version
-    - name: Validation the Extension
-      run: tfx extension isvalid --publisher ${{ secrets.VS_MARKET_PLACE_PUBLISHER }} --extension-id ${{ secrets.VS_MARKET_PLACE_EXTENSION_ID }} --token ${{ secrets.VS_MARKET_PLACE_TOKEN }}
-    - name: Copy task file
-      run: copy ./dist/task.json ./buildAndReleaseTask/ 
-    - name: Update VSS Extension File
-      uses: test-room-7/action-update-file@v1
-      with:
-        file-path: |
-          vss-extension.json
-          buildAndReleaseTask/task.json
-        commit-msg: Update resources
-        github-token: ${{ secrets.GITHUB_TOKEN }}
-    - name: Publish Extension
-      run: tfx extension publish --manifest-globs --token ${{ secrets.VS_MARKET_PLACE_TOKEN }}
+        node-version: ${{ env.nodeVersion }}
