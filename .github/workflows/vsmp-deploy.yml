@@ -3,9 +3,7 @@ name: VS Market Place Deploy
 on:
   push:
     branches: 
-      - main
-      - master
-      - '!releases/**'
+      - 'master'
 
 jobs:
   build:
