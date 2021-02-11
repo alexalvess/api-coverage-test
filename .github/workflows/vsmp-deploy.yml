@@ -3,8 +3,8 @@ name: VS Market Place Deploy
 on:
   push:
   pull_request:
-    branches: [ master ]
-    branches-ignore: '*'
+    branches: 
+      - 'master'
   release:
     types:
       - created
