@@ -5,10 +5,7 @@ on:
   pull_request:
     branches: 
       - main
-      - 'master'
-  release:
-    types:
-      - created
+      - master
 
 jobs:
   build:
