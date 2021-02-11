@@ -10,7 +10,7 @@ on:
 
 jobs:
   build:
-    if: github.event_name == push || github.event_name == pull_request
+    if: github.event_name == 'push' || github.event_name == 'pull_request'
 
     name: Build
 
@@ -34,11 +34,9 @@ jobs:
       run: npm run build:prd --prefix ./buildAndReleaseTask
 
   artifact:
-    if: github.event_name == create
+    if: github.event_name == 'release'
 
     name: Generate Artifact
-
-    needs: build
 
     runs-on: ${{ matrix.os }}
 
@@ -56,9 +54,11 @@ jobs:
         node-version: ${{ matrix.node }}
 
   publish:
+    if: github.event_name == 'release'
+
     name: Pack and Publish
 
-    needs: [build, artifact]
+    needs: artifact
 
     runs-on: ${{ matrix.os }}
 
