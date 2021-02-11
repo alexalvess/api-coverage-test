@@ -36,7 +36,7 @@ jobs:
       run: npm run build --prefix ./buildAndReleaseTask
 
   artifact:
-    if: ${{ github.ref == 'refs/heads/releases/**' }}
+    if: ${{ github.ref != 'refs/heads/master' }}
 
     name: Generate Artifact
 
