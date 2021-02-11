@@ -58,7 +58,8 @@ jobs:
     - name: Update VSS Extension File
       uses: test-room-7/action-update-file@v1
     - name: Copy task file
-      script: copy .\dist\task.json .\buildAndReleaseTask
+      with:
+        script: copy .\dist\task.json .\buildAndReleaseTask
       with:
         file-path: |
           vss-extension.json
