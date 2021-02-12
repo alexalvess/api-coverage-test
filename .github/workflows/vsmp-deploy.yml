@@ -28,14 +28,14 @@ jobs:
       uses: actions/checkout@v2
 
     - name: Get Current Branch Name
-      id: get-branch
       uses: actions/github-script@v3
-        with:
-          github-token: ${{secrets.GITHUB_TOKEN}}
-          result-encoding: string
-          script: |
-            const ref = github.ref
-            return ref.replace('refs/heads/', '')
+      id: get-branch
+      with:
+        github-token: ${{secrets.GITHUB_TOKEN}}
+        result-encoding: string
+        script: |
+          const ref = github.ref
+          return ref.replace('refs/heads/', '')
     - name: Get Result
       run: echo "${{steps.get-branch.outputs.result}}"
     
