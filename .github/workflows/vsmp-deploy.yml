@@ -145,7 +145,7 @@ jobs:
       with:
         name: artifactToUpdate
     - name: Copy task file
-      run: copy task.json ./buildAndReleaseTask/ 
+      run: copy ./dist/task.json ./buildAndReleaseTask/ 
     - name: Update VSS Extension File
       uses: test-room-7/action-update-file@v1
       with:
