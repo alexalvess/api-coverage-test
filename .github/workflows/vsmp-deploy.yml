@@ -149,7 +149,15 @@ jobs:
       run: copy ./artifactToUpdate/dist/task.json ./buildAndReleaseTask/
     - name: Copy vss-extension file
       run: copy ./artifactToUpdate/vss-extension.json ./ 
-    - name: Update VSS Extension File
+    - name: Update Files in Current Branch
+      uses: test-room-7/action-update-file@v1
+      with:
+        file-path: |
+          vss-extension.json
+          buildAndReleaseTask/task.json
+        commit-msg: Update resources
+        github-token: ${{ secrets.GITHUB_TOKEN }}
+    - name: Update Files in Master
       uses: test-room-7/action-update-file@v1
       with:
         file-path: |
@@ -157,12 +165,4 @@ jobs:
           buildAndReleaseTask/task.json
         commit-msg: Update resources
         branch: master
-        github-token: ${{ secrets.GITHUB_TOKEN }}
-    - name: Update VSS Extension File
-      uses: test-room-7/action-update-file@v1
-      with:
-        file-path: |
-          vss-extension.json
-          buildAndReleaseTask/task.json
-        commit-msg: Update resources
         github-token: ${{ secrets.GITHUB_TOKEN }}
