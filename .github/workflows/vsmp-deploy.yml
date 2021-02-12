@@ -40,9 +40,6 @@ jobs:
 
     name: Generate Artifact
 
-    environment:
-      name: artifact
-
     runs-on: ${{ matrix.os }}
 
     strategy:
@@ -57,9 +54,32 @@ jobs:
       uses: actions/setup-node@v1
       with:
         node-version: ${{ matrix.node }}
+    - name: Install Dependencies
+      run: npm install --prefix ./buildAndReleaseTask package.json
+    - name: Install Json tools
+      run: npm install -g json
+    - name: Build Task
+      run: npm run build --prefix ./buildAndReleaseTask
+    - name: Change Environment
+      run: npm run changeEnvironment
+    - name: Copy node_modules
+      run: npm run copyNodeModules
+    - name: Modify Task Version
+      run: json -I -f ./buildAndReleaseTask/task.json -e "this.version.Patch++"
+    - name: Copy Task File to Dist
+      run: npm run copyTaskToDist
+    - name: Upload Artifacts
+      uses: actions/upload-artifact@v2
+      with:
+        name: buildResults
+        path: dist
+        if-no-files-found: error
 
   publish:
     name: Pack and Publish
+
+    environment:
+      name: publish
 
     needs: artifact
 
@@ -77,3 +97,69 @@ jobs:
       uses: actions/setup-node@v1
       with:
         node-version: ${{ matrix.node }}
+    - name: Download Artifacts
+      uses: actions/download-artifact@v2
+      with:
+        name: buildResults
+        path: dist
+      
+    - name: Install tfx-cli
+      run: npm install -g tfx-cli
+    - name: Pack Extension
+      run: tfx extension create --manifest-globs vss-extension.json --rev-version
+    # - name: Validation the Extension
+    #   run: tfx extension isvalid --publisher ${{ secrets.VS_MARKET_PLACE_PUBLISHER }} --extension-id ${{ secrets.VS_MARKET_PLACE_EXTENSION_ID }} --token ${{ secrets.VS_MARKET_PLACE_TOKEN }}
+    # - name: Publish Extension
+    #   run: tfx extension publish --manifest-globs --token ${{ secrets.VS_MARKET_PLACE_TOKEN }}
+    
+    - name: Upload Artifact to Update
+      uses: actions/upload-artifact@v2
+      with: 
+        name: artifactToUpdate
+        path: |
+          vss-extension.json
+          dist/task.json
+        if-no-files-found: error
+  
+  update:
+    name: Update Files
+
+    needs: publish
+
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      matrix:
+        os: [ windows-latest ]
+        node: [ 10.x ]
+    
+    steps:
+    - name: Use GitHub Actions
+      uses: actions/checkout@v2
+    - name: Use Node 10.x
+      uses: actions/setup-node@v1
+      with:
+        node-version: ${{ matrix.node }}
+    - name: Download Artifacts
+      uses: actions/download-artifact@v2
+      with:
+        name: artifactToUpdate
+    - name: Copy task file
+      run: copy task.json ./buildAndReleaseTask/ 
+    - name: Update VSS Extension File
+      uses: test-room-7/action-update-file@v1
+      with:
+        file-path: |
+          vss-extension.json
+          buildAndReleaseTask/task.json
+        commit-msg: Update resources
+        branch: master
+        github-token: ${{ secrets.GITHUB_TOKEN }}
+    - name: Update VSS Extension File
+      uses: test-room-7/action-update-file@v1
+      with:
+        file-path: |
+          vss-extension.json
+          buildAndReleaseTask/task.json
+        commit-msg: Update resources
+        github-token: ${{ secrets.GITHUB_TOKEN }}
