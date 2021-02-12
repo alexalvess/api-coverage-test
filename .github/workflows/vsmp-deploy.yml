@@ -50,20 +50,6 @@ jobs:
     steps:
     - name: Use GitHub Actions
       uses: actions/checkout@v2
-
-    - name: Get Current Branch Name
-      uses: actions/github-script@v3
-      id: get-branch
-      with:
-        github-token: ${{secrets.GITHUB_TOKEN}}
-        result-encoding: string
-        script: |
-          const ref = context.ref
-          console.log(ref)
-          return ref.replace('refs/heads/', '')
-    - name: Get Result
-      run: echo "${{steps.get-branch.outputs.result}}"
-
     - name: Use Node 10.x
       uses: actions/setup-node@v1
       with:
@@ -163,6 +149,13 @@ jobs:
       run: copy ./artifactToUpdate/dist/task.json ./buildAndReleaseTask/
     - name: Copy vss-extension file
       run: copy ./artifactToUpdate/vss-extension.json ./ 
+    - name: Get Current Branch Name
+      uses: actions/github-script@v3
+      id: get-branch
+      with:
+        github-token: ${{secrets.GITHUB_TOKEN}}
+        result-encoding: string
+        script: return context.ref.replace('refs/heads/', '')
     - name: Update Files in Current Branch
       uses: test-room-7/action-update-file@v1
       with:
@@ -170,7 +163,7 @@ jobs:
           vss-extension.json
           buildAndReleaseTask/task.json
         commit-msg: Update resources
-        branch: ${{ env.ref }}
+        branch: ${{steps.get-branch.outputs.result}}
         github-token: ${{ secrets.GITHUB_TOKEN }}
     - name: Update Files in Master
       uses: test-room-7/action-update-file@v1
