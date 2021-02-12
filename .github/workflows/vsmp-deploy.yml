@@ -136,6 +136,7 @@ jobs:
     steps:
     - name: Use GitHub Actions
       uses: actions/checkout@v2
+    - name: Get Current Branch Name
       run: |
         ref="${github_ref////-}"
         echo $ref
