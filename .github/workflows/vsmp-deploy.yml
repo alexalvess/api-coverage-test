@@ -25,20 +25,7 @@ jobs:
 
     steps:
     - name: Use GitHub Actions
-      uses: actions/checkout@v2
-
-    - name: Get Current Branch Name
-      uses: actions/github-script@v3
-      id: get-branch
-      with:
-        github-token: ${{secrets.GITHUB_TOKEN}}
-        result-encoding: string
-        script: |
-          const ref = github.ref
-          return ref.replace('refs/heads/', '')
-    - name: Get Result
-      run: echo "${{steps.get-branch.outputs.result}}"
-    
+      uses: actions/checkout@v2    
     - name: Use Node 10.x
       uses: actions/setup-node@v1
       with:
@@ -63,6 +50,20 @@ jobs:
     steps:
     - name: Use GitHub Actions
       uses: actions/checkout@v2
+
+    - name: Get Current Branch Name
+      uses: actions/github-script@v3
+      id: get-branch
+      with:
+        github-token: ${{secrets.GITHUB_TOKEN}}
+        result-encoding: string
+        script: |
+          const ref = github.ref
+          console.log(ref)
+          return ref.replace('refs/heads/', '')
+    - name: Get Result
+      run: echo "${{steps.get-branch.outputs.result}}"
+
     - name: Use Node 10.x
       uses: actions/setup-node@v1
       with:
