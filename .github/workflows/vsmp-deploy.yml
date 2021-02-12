@@ -26,6 +26,15 @@ jobs:
     steps:
     - name: Use GitHub Actions
       uses: actions/checkout@v2
+
+    - name: Get Current Branch Name
+      run: |
+        ref="${github_ref/refs/head//-}"
+        echo $ref
+        echo "::set-env name=ref::$ref"
+      env:
+        github_ref: ${{ github.ref }}
+    
     - name: Use Node 10.x
       uses: actions/setup-node@v1
       with:
