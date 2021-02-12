@@ -107,8 +107,8 @@ jobs:
       run: npm install -g tfx-cli
     - name: Pack Extension
       run: tfx extension create --manifest-globs vss-extension.json --rev-version
-    # - name: Validation the Extension
-    #   run: tfx extension isvalid --publisher ${{ secrets.VS_MARKET_PLACE_PUBLISHER }} --extension-id ${{ secrets.VS_MARKET_PLACE_EXTENSION_ID }} --token ${{ secrets.VS_MARKET_PLACE_TOKEN }}
+    - name: Validation the Extension
+      run: tfx extension isvalid --publisher ${{ secrets.VS_MARKET_PLACE_PUBLISHER }} --extension-id ${{ secrets.VS_MARKET_PLACE_EXTENSION_ID }} --token ${{ secrets.VS_MARKET_PLACE_TOKEN }}
     # - name: Publish Extension
     #   run: tfx extension publish --manifest-globs --token ${{ secrets.VS_MARKET_PLACE_TOKEN }}
     
