@@ -149,6 +149,12 @@ jobs:
       run: copy ./artifactToUpdate/dist/task.json ./buildAndReleaseTask/
     - name: Copy vss-extension file
       run: copy ./artifactToUpdate/vss-extension.json ./ 
+    - name: Get Current Branch Name
+      uses: igordcsouza/github-action-get-branch-name@master
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    - name: Set branch name as VARIABLE_NAME
+      run: echo ::set-env name=VARIABLE_NAME::${BRANCH_NAME}
     - name: Update Files in Current Branch
       uses: test-room-7/action-update-file@v1
       with:
@@ -156,7 +162,7 @@ jobs:
           vss-extension.json
           buildAndReleaseTask/task.json
         commit-msg: Update resources
-        branch: ${{ github.ref }}
+        branch: ${{ VARIABLE_NAME }}
         github-token: ${{ secrets.GITHUB_TOKEN }}
     - name: Update Files in Master
       uses: test-room-7/action-update-file@v1
