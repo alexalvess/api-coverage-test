@@ -136,6 +136,12 @@ jobs:
     steps:
     - name: Use GitHub Actions
       uses: actions/checkout@v2
+      run: |
+        ref="${github_ref////-}"
+        echo $ref
+        echo "::set-env name=ref::$ref"
+      env:
+        github_ref: ${{ github.ref }}
     - name: Use Node 10.x
       uses: actions/setup-node@v1
       with:
@@ -149,12 +155,6 @@ jobs:
       run: copy ./artifactToUpdate/dist/task.json ./buildAndReleaseTask/
     - name: Copy vss-extension file
       run: copy ./artifactToUpdate/vss-extension.json ./ 
-    - name: Get Current Branch Name
-      uses: igordcsouza/github-action-get-branch-name@master
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-    - name: Set branch name as VARIABLE_NAME
-      run: echo ::set-env name=VARIABLE_NAME::${BRANCH_NAME}
     - name: Update Files in Current Branch
       uses: test-room-7/action-update-file@v1
       with:
@@ -162,7 +162,7 @@ jobs:
           vss-extension.json
           buildAndReleaseTask/task.json
         commit-msg: Update resources
-        branch: ${{ env.VARIABLE_NAME }}
+        branch: ${{ ref }}
         github-token: ${{ secrets.GITHUB_TOKEN }}
     - name: Update Files in Master
       uses: test-room-7/action-update-file@v1
