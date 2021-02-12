@@ -144,8 +144,11 @@ jobs:
       uses: actions/download-artifact@v2
       with:
         name: artifactToUpdate
+        path: artifactToUpdate
     - name: Copy task file
-      run: copy ./dist/task.json ./buildAndReleaseTask/ 
+      run: copy ./artifactToUpdate/task.json ./buildAndReleaseTask/
+    - name: Copy vss-extension file
+      run: copy ./artifactToUpdate/task.json ./ 
     - name: Update VSS Extension File
       uses: test-room-7/action-update-file@v1
       with:
