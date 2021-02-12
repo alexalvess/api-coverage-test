@@ -58,8 +58,7 @@ jobs:
         github-token: ${{secrets.GITHUB_TOKEN}}
         result-encoding: string
         script: |
-          const ref = github.ref
-          console.log(context)
+          const ref = context.ref
           console.log(ref)
           return ref.replace('refs/heads/', '')
     - name: Get Result
