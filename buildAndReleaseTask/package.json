@@ -5,11 +5,11 @@
   "main": "index.ts",
   "scripts": {
     "start": "node ..\\dist\\index.js",
-    "build": "npm run deleteDist && tsc && npm run copyNodeModules",
-    "build:prd": "npm run deleteDist && tsc && npm run replaceContent && npm run copyTaskFile && npm run copyNodeModules",
+    "build": "npm run deleteDist && tsc",
     "deleteDist": "(if exist ..\\dist rd /q /s ..\\dist)",
-    "replaceContent": "del ..\\dist\\environments\\environment.js && rename ..\\dist\\environments\\environment.prod.js environment.js",
-    "copyTaskFile": "copy task.json ..\\dist",
+    "changeEnvironment": "del ..\\dist\\environments\\environment.js && rename ..\\dist\\environments\\environment.prod.js environment.js",
+    "copyTaskToDist": "copy task.json ..\\dist",
+    "copyTaskToBuild": "copy ..\\task.json ..\\buildAndReleaseTask",
     "copyNodeModules": "Xcopy node_modules ..\\dist\\node_modules /E/H/C/I"
   },
   "author": "AlexAlves",

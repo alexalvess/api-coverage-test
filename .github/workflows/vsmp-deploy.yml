@@ -2,68 +2,175 @@ name: VS Market Place Deploy
 
 on:
   push:
-    branches: [ master, homologation ] 
+    branches: 
+    - 'master'
+    - 'releases/**'
   pull_request:
-    branches: [ master ]
+    branches:
+    - 'master'
+    - 'releases/**'
 
 jobs:
   build:
-  
-    runs-on: windows-latest
+    if: github.ref == 'refs/heads/master' || github.base_ref == 'master'
+
+    name: Build
+
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      matrix:
+        os: [ windows-latest ]
+        node: [ 10.x ]
 
     steps:
-    - uses: actions/checkout@v2
+    - name: Use GitHub Actions
+      uses: actions/checkout@v2    
     - name: Use Node 10.x
       uses: actions/setup-node@v1
       with:
-        node-version: 10.x
+        node-version: ${{ matrix.node }}
     - name: Install Dependencies
       run: npm install --prefix ./buildAndReleaseTask package.json
-    - name: Install Json tools
-      run: npm install -g json
-    - name: Modify Task version
-      run: json -I -f ./buildAndReleaseTask/task.json -e "this.version.Patch++"
     - name: Build Task
-      run: npm run build:prd --prefix ./buildAndReleaseTask
-    - name: Upload build results
+      run: npm run build --prefix ./buildAndReleaseTask
+
+  artifact:
+    if: github.event_name == 'push' && github.ref != 'refs/heads/master'
+
+    name: Generate Artifact
+
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      matrix:
+        os: [ windows-latest ]
+        node: [ 10.x ]
+
+    steps:
+    - name: Use GitHub Actions
+      uses: actions/checkout@v2
+    - name: Use Node 10.x
+      uses: actions/setup-node@v1
+      with:
+        node-version: ${{ matrix.node }}
+    - name: Install Dependencies
+      run: npm install --prefix ./buildAndReleaseTask package.json
+    - name: Install Json Tools
+      run: npm install -g json
+    - name: Build Task
+      run: npm run build --prefix ./buildAndReleaseTask
+    - name: Change Environment
+      run: npm run changeEnvironment --prefix ./buildAndReleaseTask
+    - name: Copy node_modules
+      run: npm run copyNodeModules --prefix ./buildAndReleaseTask
+    - name: Modify Task Version
+      run: json -I -f ./buildAndReleaseTask/task.json -e "this.version.Patch++"
+    - name: Copy Task File to Dist
+      run: npm run copyTaskToDist --prefix ./buildAndReleaseTask
+    - name: Upload Artifacts
       uses: actions/upload-artifact@v2
       with:
         name: buildResults
         path: dist
         if-no-files-found: error
 
-  pack-publish:
-    if: github.base_ref == false
-    needs: [build]
+  publish:
+    name: Pack and Publish
 
-    runs-on: windows-latest
+    environment:
+      name: publish
+
+    needs: artifact
+
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      matrix:
+        os: [ windows-latest ]
+        node: [ 10.x ]
 
     steps:
-    - uses: actions/checkout@v2
+    - name: Use GitHub Actions
+      uses: actions/checkout@v2
     - name: Use Node 10.x
       uses: actions/setup-node@v1
       with:
-        node-version: 10.x
-    - name: Download build results
+        node-version: ${{ matrix.node }}
+    - name: Download Artifacts
       uses: actions/download-artifact@v2
       with:
         name: buildResults
         path: dist
+      
     - name: Install tfx-cli
       run: npm install -g tfx-cli
     - name: Pack Extension
       run: tfx extension create --manifest-globs vss-extension.json --rev-version
-    - name: Validation the Extension
-      run: tfx extension isvalid --publisher ${{ secrets.VS_MARKET_PLACE_PUBLISHER }} --extension-id ${{ secrets.VS_MARKET_PLACE_EXTENSION_ID }} --token ${{ secrets.VS_MARKET_PLACE_TOKEN }}
+    # - name: Validation the Extension
+    #   run: tfx extension isvalid --publisher ${{ secrets.VS_MARKET_PLACE_PUBLISHER }} --extension-id ${{ secrets.VS_MARKET_PLACE_EXTENSION_ID }} --token ${{ secrets.VS_MARKET_PLACE_TOKEN }}
+    # - name: Publish Extension
+    #   run: tfx extension publish --manifest-globs --token ${{ secrets.VS_MARKET_PLACE_TOKEN }}
+    
+    - name: Upload Artifact to Update
+      uses: actions/upload-artifact@v2
+      with: 
+        name: artifactToUpdate
+        path: |
+          vss-extension.json
+          dist/task.json
+        if-no-files-found: error
+  
+  update:
+    name: Update Files
+
+    needs: publish
+
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      matrix:
+        os: [ windows-latest ]
+        node: [ 10.x ]
+    
+    steps:
+    - name: Use GitHub Actions
+      uses: actions/checkout@v2
+    - name: Use Node 10.x
+      uses: actions/setup-node@v1
+      with:
+        node-version: ${{ matrix.node }}
+    - name: Download Artifacts
+      uses: actions/download-artifact@v2
+      with:
+        name: artifactToUpdate
+        path: artifactToUpdate
     - name: Copy task file
-      run: copy ./dist/task.json ./buildAndReleaseTask/ 
-    - name: Update VSS Extension File
+      run: copy ./artifactToUpdate/dist/task.json ./buildAndReleaseTask/
+    - name: Copy vss-extension file
+      run: copy ./artifactToUpdate/vss-extension.json ./ 
+    - name: Get Current Branch Name
+      uses: actions/github-script@v3
+      id: get-branch
+      with:
+        github-token: ${{secrets.GITHUB_TOKEN}}
+        result-encoding: string
+        script: return context.ref.replace('refs/heads/', '')
+    - name: Update Files in Current Branch
       uses: test-room-7/action-update-file@v1
       with:
         file-path: |
           vss-extension.json
           buildAndReleaseTask/task.json
         commit-msg: Update resources
+        branch: ${{steps.get-branch.outputs.result}}
         github-token: ${{ secrets.GITHUB_TOKEN }}
-    - name: Publish Extension
-      run: tfx extension publish --manifest-globs --token ${{ secrets.VS_MARKET_PLACE_TOKEN }}
+    - name: Update Files in Master
+      uses: test-room-7/action-update-file@v1
+      with:
+        file-path: |
+          vss-extension.json
+          buildAndReleaseTask/task.json
+        commit-msg: Update resources
+        branch: master
+        github-token: ${{ secrets.GITHUB_TOKEN }}
