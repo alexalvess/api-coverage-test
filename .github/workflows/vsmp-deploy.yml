@@ -61,13 +61,13 @@ jobs:
     - name: Build Task
       run: npm run build --prefix ./buildAndReleaseTask
     - name: Change Environment
-      run: npm run changeEnvironment
+      run: npm run changeEnvironment --prefix ./buildAndReleaseTask
     - name: Copy node_modules
-      run: npm run copyNodeModules
+      run: npm run copyNodeModules --prefix ./buildAndReleaseTask
     - name: Modify Task Version
       run: json -I -f ./buildAndReleaseTask/task.json -e "this.version.Patch++"
     - name: Copy Task File to Dist
-      run: npm run copyTaskToDist
+      run: npm run copyTaskToDist --prefix ./buildAndReleaseTask
     - name: Upload Artifacts
       uses: actions/upload-artifact@v2
       with:
