@@ -59,6 +59,7 @@ jobs:
         result-encoding: string
         script: |
           const ref = github.ref
+          console.log(context)
           console.log(ref)
           return ref.replace('refs/heads/', '')
     - name: Get Result
@@ -150,13 +151,6 @@ jobs:
     steps:
     - name: Use GitHub Actions
       uses: actions/checkout@v2
-    - name: Get Current Branch Name
-      run: |
-        ref="${github_ref////-}"
-        echo $ref
-        echo "::set-env name=ref::$ref"
-      env:
-        github_ref: ${{ github.ref }}
     - name: Use Node 10.x
       uses: actions/setup-node@v1
       with:
