@@ -162,7 +162,7 @@ jobs:
           vss-extension.json
           buildAndReleaseTask/task.json
         commit-msg: Update resources
-        branch: ${{ VARIABLE_NAME }}
+        branch: ${{ env.VARIABLE_NAME }}
         github-token: ${{ secrets.GITHUB_TOKEN }}
     - name: Update Files in Master
       uses: test-room-7/action-update-file@v1
