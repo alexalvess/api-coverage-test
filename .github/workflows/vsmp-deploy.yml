@@ -61,7 +61,7 @@ jobs:
     - name: Build Task
       run: npm run build --prefix ./buildAndReleaseTask
     - name: Change Environment
-      run: del ./dist/environments/environment.js && rename ./dist/environments/environment.prod.js environment.js
+      run: npm run changeEnvironment --prefix ./buildAndReleaseTask
     - name: Copy node_modules
       run: npm run copyNodeModules --prefix ./buildAndReleaseTask
     - name: Modify Task Version
