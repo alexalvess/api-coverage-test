@@ -25,7 +25,6 @@
       "name": "ApiUrl",
       "type": "string",
       "label": "Api url",
-      "defaultValue": "",
       "required": true,
       "helpMarkDown": "For example: https://{url}/"
     },
@@ -33,7 +32,6 @@
       "name": "SwaggerJsonPath",
       "type": "string",
       "label": "PATH to JSON of Swagger",
-      "defaultValue": "",
       "required": true,
       "helpMarkDown": "For example: swagger/{version}/swagger.json"
     },
@@ -41,20 +39,19 @@
       "name": "TestsResultPath",
       "type": "string",
       "label": "Tests Result Path",
-      "defaultValue": "$(System.DefaultWorkingDirectory)",
+      "defaultValue": "$(System.DefaultWorkingDirectory)/Results/integrate-test.json",
       "required": true,
       "helpMarkDown": "Output path where the test result are available."
     },
     {
-      "name": "WhereIsTheTest",
+      "name": "TestType",
       "type": "radio",
-      "label": "Where is the tests name",
+      "label": "How was the test built?",
       "required": true,
-      "defaultValue": "testSuite",
-      "helpMarkDown": "Choose which tag shows the details of the test (path and verb) in the generated XML. In POSTMAN it is generated in Test Suite, and in applications made in JS it is generated in Test Case.",
+      "defaultValue": "postman",
       "options": {
-        "testSuite": "Test Suite",
-        "testCase": "Test Case"
+        "postman": "Postman",
+        "mocha": "Using Mocha"
       }
     },
     {
@@ -77,7 +74,6 @@
       "name": "ApplicationName",
       "type": "string",
       "label": "Application Name",
-      "defaultValue": "",
       "required": false,
       "helpMarkDown": "Your project name",
       "groupName": "WebhookGroup"

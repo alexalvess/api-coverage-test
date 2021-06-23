@@ -20,7 +20,7 @@ export function inputBasicValidation(
         });
     }
 
-    if(!testResultPath || testResultPath === '' || testResultPath.includes('.')) {
+    if(!testResultPath || testResultPath === '') {
         errors.push({
             prop: 'testResultPath',
             message: 'Inform a valid PATH Location for Test Result.'

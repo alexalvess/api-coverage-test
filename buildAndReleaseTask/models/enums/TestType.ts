@@ -1,4 +1,4 @@
 export enum TestType {
-    TestSuite,
-    TestCase
+    Postman,
+    Mocha
 }
