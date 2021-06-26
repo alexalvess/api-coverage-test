@@ -8,30 +8,14 @@ export class CoverageModel {
     public totalUncover: number;
     public uncover: Array<EndpointModel>;
 
-    constructor() {
-        this.tested = 0;
-        this.existed = 0;
-        this.coverage = 0;
-        this.totalUncover = 0;
-        this.uncover = new Array<EndpointModel>();
-    }
-
-    public getCoverage(): number {
+    constructor(endpointExists: EndpointModel[], endpointTested: EndpointModel[]) {
+        this.tested = endpointTested.length;
+        this.existed = endpointExists.length;
         this.coverage = (this.tested * 100) / this.existed;
-        return this.coverage;
-    }
-
-    public coverLog(): void {
-        this.coverage = (this.tested * 100) / this.existed;
-        log(`Coverage: ${this.coverage} %`);
-    }
-
-    public uncoverLog(): void {
-        this.totalUncover = this.uncover.reduce((accumulator, current) => accumulator + current.infoPath.length, 0);
-
-        log(`Uncover endpoints: ${this.totalUncover}`);
-        this.uncover.forEach(item => {
-            console.log(`Path: ${item.path} | Verbs: ${item.infoPath.map(m => m.verb)}`);
+        this.totalUncover = this.existed - this.tested;
+        this.uncover = endpointExists.filter(el => {
+            if(!endpointTested.find(f => f.path === el.path && f.verb === el.verb))
+                return el;
         });
     }
 }

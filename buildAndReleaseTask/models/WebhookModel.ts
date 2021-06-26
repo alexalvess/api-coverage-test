@@ -36,22 +36,26 @@ export class WebhookModel {
         this.endpointsTested = endpointsTested; 
         this.endpointsUncover = endpointsUncover;
 
-        this.totalTime = endpointsTested.reduce((accumulator, current) =>{
-            return accumulator + current.infoPath.reduce((ac, cu) => {
-                return ac + cu.time;
-            }, 0);
-        }, 0);
+        this.totalTime = 0;
+        this.totalSucceed = 0;
+        this.totalFailure = 0;
 
-        this.totalSucceed = endpointsTested.reduce((accumulator, current) =>{
-            return accumulator + current.infoPath.filter(f => f.success).reduce((ac, cu) => {
-                return ac + cu.time;
-            }, 0);
-        }, 0);
+        // this.totalTime = endpointsTested.reduce((accumulator, current) =>{
+        //     return accumulator + current.infoPath.reduce((ac, cu) => {
+        //         return ac + cu.time;
+        //     }, 0);
+        // }, 0);
 
-        this.totalFailure = endpointsTested.reduce((accumulator, current) =>{
-            return accumulator + current.infoPath.filter(f => !f.success).reduce((ac, cu) => {
-                return ac + cu.time;
-            }, 0);
-        }, 0);
+        // this.totalSucceed = endpointsTested.reduce((accumulator, current) =>{
+        //     return accumulator + current.infoPath.filter(f => f.success).reduce((ac, cu) => {
+        //         return ac + cu.time;
+        //     }, 0);
+        // }, 0);
+
+        // this.totalFailure = endpointsTested.reduce((accumulator, current) =>{
+        //     return accumulator + current.infoPath.filter(f => !f.success).reduce((ac, cu) => {
+        //         return ac + cu.time;
+        //     }, 0);
+        // }, 0);
     }
 }

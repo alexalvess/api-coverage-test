@@ -1,6 +1,5 @@
 import { CoverageModel } from "../models/CoverageModel";
 import { EndpointModel } from "../models/EndpointModel";
-import { InfoPathModel } from "../models/InfoPathModel";
 import { InputDataModel } from "../models/InputDataModel";
 import { WebhookModel } from "../models/WebhookModel";
 import { log } from "./log";
@@ -13,29 +12,29 @@ export function findUncoverEndpoints(
 ): EndpointModel[] {
     const uncoverEndpoints: EndpointModel[] = [];
 
-    endpointsExists.forEach((item: EndpointModel) => {
-        let endpoint = endpointsTested.find((fi) => fi.path == item.path);
+    // endpointsExists.forEach((item: EndpointModel) => {
+    //     let endpoint = endpointsTested.find((fi) => fi.path == item.path);
 
-        if (endpoint) {
-            const verbsInExisted = item.infoPath.map((m) => m.verb);
-            const verbsInTested = endpoint.infoPath.map((m) => m.verb);
+    //     if (endpoint) {
+    //         const verbsInExisted = item.infoPath.map((m) => m.verb);
+    //         const verbsInTested = endpoint.infoPath.map((m) => m.verb);
 
-            const verbsUncover = verbsInExisted.filter(
-                (f) => !verbsInTested.includes(f)
-            );
+    //         const verbsUncover = verbsInExisted.filter(
+    //             (f) => !verbsInTested.includes(f)
+    //         );
 
-            if (verbsUncover && verbsUncover.length > 0) {
-                endpoint = new EndpointModel();
-                endpoint.path = item.path;
-                endpoint.infoPath = [
-                    ...verbsUncover.map((m) => new InfoPathModel(m)),
-                ];
-                uncoverEndpoints.push(endpoint);
-            }
-        } else {
-            uncoverEndpoints.push(item);
-        }
-    });
+    //         if (verbsUncover && verbsUncover.length > 0) {
+    //             endpoint = new EndpointModel();
+    //             endpoint.path = item.path;
+    //             endpoint.infoPath = [
+    //                 ...verbsUncover.map((m) => new InfoPathModel(m)),
+    //             ];
+    //             uncoverEndpoints.push(endpoint);
+    //         }
+    //     } else {
+    //         uncoverEndpoints.push(item);
+    //     }
+    // });
 
     return uncoverEndpoints;
 }
@@ -52,7 +51,8 @@ export function generateWebhookPayload(
         inputData.buildNumber ?? "",
         coverage.existed,
         coverage.tested,
-        coverage.getCoverage(),
+        0,
+        // coverage.getCoverage(),
         endpointsExists,
         endpointsTested,
         coverage.uncover
@@ -87,7 +87,7 @@ export function makePostRequest(payload: any, url: string): void {
 }
 
 export function makeGetRequest(url: string): Promise<any> {
-    log(`Send to API: ${url}`);
+    log(`Make request to: ${url}`);
     const instance = axios.create({
         httpsAgent: new https.Agent({  
             rejectUnauthorized: false

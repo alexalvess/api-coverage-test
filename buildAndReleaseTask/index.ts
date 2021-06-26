@@ -4,7 +4,7 @@ import { EndpointModel } from "./models/EndpointModel";
 import { TestType } from "./models/enums/TestType";
 import { InputDataModel } from "./models/InputDataModel";
 import { log } from "./utils/log";
-import { endpointsMap, testCaseMap, testSuiteMap, postmanMap } from "./utils/mappers";
+import { endpointsMap, postmanMap } from "./utils/mappers";
 import {
     findUncoverEndpoints,
     generateWebhookPayload,
@@ -67,77 +67,44 @@ function getInputVariables(): InputDataModel {
 }
 
 async function processAnalysis(inputData: InputDataModel) {
+    let endpointsTested: EndpointModel[];
+
     if(inputData.testType === TestType.Postman) {
         let fileTestResult = fs.readFileSync(inputData.testResultPath, 'utf8');
         let jsonTestResult = JSON.parse(fileTestResult);
 
-        let endpointsTested: Array<EndpointModel> = new Array<EndpointModel>();
         log("Reading the Postman tests results");
-        postmanMap(jsonTestResult, endpointsTested);
+        endpointsTested = postmanMap(jsonTestResult);
         log("The Postman test result was read");
     } else {
         throw new Error("It is currently only implemented for postman.");
     }
 
-    // const testResultsFile = fs.readFileSync(file, "utf8");
-    // parser.parseString(testResultsFile, (error: any, result: any) => {
-    //     if (error) {
-    //         throw error;
-    //     } else {
-    //         let endpointsTested: Array<EndpointModel> = new Array<EndpointModel>();
-    //         let endpointsExists: Array<EndpointModel> = new Array<EndpointModel>();
-    //         let coverage: CoverageModel = new CoverageModel();
+    makeGetRequest(inputData.url)
+        .then((response: any) => {
+            log("Reading the Swagger Documentation");
+            const endpointsExists = endpointsMap(response.data);
+            log("The Swagger Documentation was read");
 
-    //         if (inputData.testType === TestType.TestSuite) {
-    //             testSuiteMap(result.testsuites.testsuite, endpointsTested);
-    //         } else {
-    //             testCaseMap(result.testsuites.testsuite, endpointsTested);
-    //         }
+            let coverage: CoverageModel = new CoverageModel(endpointsExists, endpointsTested);
 
-    //         coverage.tested = EndpointModel.totalEndpoints(
-    //             "Endpoints tested",
-    //             endpointsTested
-    //         );
+            if (inputData.webhook) {
+                const payload = generateWebhookPayload(
+                    inputData,
+                    coverage,
+                    endpointsExists,
+                    endpointsTested
+                );
+                inputData.webhook.forEach((url) =>
+                    makePostRequest(payload, url)
+                );
+            }
 
-    //         log(`Reading Swagger of API: ${inputData.url}`);
-    //         makeGetRequest(inputData.url)
-    //             .then((response: any) => {
-    //                 endpointsMap(response.data, endpointsExists);
-
-    //                 coverage.existed = EndpointModel.totalEndpoints(
-    //                     "Endpoints found",
-    //                     endpointsExists
-    //                 );
-
-    //                 coverage.uncover = findUncoverEndpoints(
-    //                     endpointsExists,
-    //                     endpointsTested
-    //                 );
-
-    //                 coverage.coverLog();
-    //                 coverage.uncoverLog();
-
-    //                 if (inputData.webhook) {
-    //                     const payload = generateWebhookPayload(
-    //                         inputData,
-    //                         coverage,
-    //                         endpointsExists,
-    //                         endpointsTested
-    //                     );
-    //                     inputData.webhook.forEach((url) =>
-    //                         makePostRequest(payload, url)
-    //                     );
-    //                 }
-
-    //                 if(inputData.minimumQualityGate > coverage.coverage) {
-    //                     throw new Error("You have not reached the minimum coverage percentage.");
-    //                 }
-    //             })
-    //             .catch((error) => {
-    //                 throw error;
-    //             });
-    //     }
-    // });
+            if(inputData.minimumQualityGate > coverage.coverage) {
+                throw new Error("You have not reached the minimum coverage percentage.");
+            }
+        })
+        .catch(error => { throw error; });
 }
 
 run();
