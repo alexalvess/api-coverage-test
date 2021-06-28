@@ -1,54 +1,44 @@
 import { EndpointModel } from "../models/EndpointModel";
-import { InfoPathModel } from "../models/InfoPathModel";
 import { log } from "./log";
 
-export function testSuiteMap(tests: any[], endpointsTested: EndpointModel[]) {
-    log('Reading tests in Test Suite tag.');
+export function postmanMap(testResult: any): EndpointModel[] {
+    if(!testResult)
+        throw new Error("No test were found.");
 
-    tests.map((item: any) => {
-        const testName = item.ATTR.name as string;
-        const time = item.ATTR.time as number;
-        const executeAt = item.ATTR.timestamp as Date;
-        const success = (item.ATTR.failures as number) > 0 ? false : true;
-        let message: string | undefined;
-
-        if(!success) {
-            message = item.testcase[0].failure[0].ATTR.message;
-        }
-
-        EndpointModel.setSamePath(endpointsTested, testName, time, executeAt, success, message);
-    });
+    return discoverPath(testResult.collection.item, testResult.run.executions, []);
 }
 
-export function testCaseMap(tests: any[], endpointsTested: EndpointModel[]) {
-    log('Reading tests in Test Case tag.');
+function discoverPath(items: [], executions: [], paths: Array<EndpointModel>): Array<EndpointModel> {
+    items.forEach((el: any) => {
+        if(el.item)
+            return discoverPath(el.item, executions, paths);
 
-    tests.map((item: any) => {
-        if(item.testcase) {
-            const executeAt = item.ATTR.timestamp as Date;
-
-            item.testcase.map((tc: any) => {
-                const testName = tc.ATTR.classname as string;
-                const time = tc.ATTR.time as number;
-                let success: boolean = true;
-                let message: string | undefined;
-                
-                if(tc.failure) {
-                    success = false;
-                    message = tc.failure[0].ATTR.message;
-                }
-                
-                EndpointModel.setSamePath(endpointsTested, testName, time, executeAt, success, message);
-            });
-        }
+        const success = hasError(executions, el.id);
+        
+        const fullPath = EndpointModel.buildFullPath(el.request.url.path, el.request.url.query);
+        paths.push(new EndpointModel(el.id, fullPath, el.request.method, !success));
     });
+
+    return paths;
 }
 
-export function endpointsMap(body: any, endpointsExists: EndpointModel[]) {
+function hasError(executions: [], endpointId: string): boolean {
+    let assertions: [{}] = (executions.find((f: any) => f.id === endpointId) as any).assertions;
+
+    if(assertions.filter((f: any) => f.error).length > 0)
+        return true;
+    
+    return false;
+}
+
+export function endpointsMap(body: any): EndpointModel[] {
+    let endpointsExists = new Array<EndpointModel>();
     Object.keys(body.paths).forEach(element => {
-        let endpoint = new EndpointModel();
-        endpoint.path = element;
-        endpoint.infoPath = Object.keys(body.paths[element]).map(el => new InfoPathModel(el?.toUpperCase()))
-        endpointsExists.push(endpoint);
+        Object.keys(body.paths[element]).map(el => el?.toUpperCase()).forEach(verb => {
+            let endpoint = new EndpointModel('', element, verb, false);
+            endpointsExists.push(endpoint);
+        });
     });
+
+    return endpointsExists;
 }

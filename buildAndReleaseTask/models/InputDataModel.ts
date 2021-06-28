@@ -31,10 +31,10 @@ export class InputDataModel {
         this.url = `${apiUrl}/${swaggerPath}`;
         this.testResultPath = testResultPath ?? '';
 
-        if(testType === 'testSuite') {
-            this.testType = TestType.TestSuite;
-        } else if(testType === 'testCase') {
-            this.testType = TestType.TestCase;
+        if(testType === 'postman') {
+            this.testType = TestType.Postman;
+        } else if(testType === 'mocha') {
+            this.testType = TestType.Mocha;
         } else {
             throw new Error('Invalid test type.');
         }

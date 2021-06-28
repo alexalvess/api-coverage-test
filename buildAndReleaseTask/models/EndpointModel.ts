@@ -1,61 +1,43 @@
+import path from "path";
 import { log } from "../utils/log";
-import { InfoPathModel } from "./InfoPathModel";
 
 export class EndpointModel {
+    public id: string;
     public path: string;
-    public infoPath: Array<InfoPathModel>;
+    public verb: string;
+    public isSuccess: boolean;
 
-    constructor () {
-        this.path = '';
-        this.infoPath = new Array<InfoPathModel>();
-    }
-
-    public addInfoPath (verb: string, time: number, executeAt: Date, success: boolean, message: string | undefined): void {
-        if(verb && !this.infoPath.find(f => f.verb === verb.toUpperCase())) {
-            const infoPath = new InfoPathModel(verb.toUpperCase());
-            infoPath.time = time;
-            infoPath.executeAt = executeAt;
-            infoPath.success = success;
-            infoPath.failureMessage = message;
-
-            this.infoPath.push(infoPath);
-        }
-    }
-
-    public setByTestProp (testName: string, time: number, executeAt: Date, success: boolean, message: string | undefined): void {
-        const info = testName.split(' ');
-        const path = info[info.length - 1];
-        const verb = info[info.length - 2];
+    constructor (id: string, path: string, verb: string, isSuccess: boolean) {
+        this.id = id;
         this.path = path;
-
-        this.addInfoPath(verb, time, executeAt, success, message);
+        this.verb = verb;
+        this.isSuccess = isSuccess;
     }
 
-    public static setSamePath(endpoints: Array<EndpointModel>, testName: string, time: number, executeAt: Date, success: boolean, message: string | undefined): void {
-        const info = testName.split(' ');
-        const path = info[info.length - 1];
-        const verb = info[info.length - 2];
-
-        let endpoint = endpoints.find(f => f.path === path);
-
-        if(endpoint) {
-            endpoint.addInfoPath(verb, time, executeAt, success, message);
-        } else {
-            endpoint = new EndpointModel();
-            endpoint.path = path;
-            endpoint.addInfoPath(verb, time, executeAt, success, message);
-            endpoints.push(endpoint);
-        }
+    public buildEndpoint (id: string, path: string, verb: string, isSuccess: boolean): EndpointModel{
+        return new EndpointModel(id, path, verb, isSuccess);
     }
 
-    public static totalEndpoints(context: string, endpoints: Array<EndpointModel>): number {
-        const total = endpoints.reduce((accumulator, current) => accumulator + current.infoPath.length, 0)
-        log(`${context}: ${total}`);
+    public static buildFullPath(paths: string[], queries: {key: string, value: string}[]): string {
+        let fullPath = '';
+
+        if(!paths || paths.length === 0)
+            throw new Error("Invalid path found");
         
-        endpoints.forEach((element) => {
-            console.log(`Path: ${element.path} | Verbs: ${element.infoPath.map(item => item.verb)}`);
+        paths.forEach(el => {
+            if(el.includes(':'))
+                fullPath += `/{${el.slice(1)}}`;
+            else
+                fullPath += `/${el}`;
         });
 
-        return total;
+        queries.forEach((el, index) => {
+            if(index === 0)
+                fullPath += '?';
+
+            fullPath += `${el.key}={${el.key}}`;
+        });
+
+        return fullPath;
     }
 }

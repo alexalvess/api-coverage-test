@@ -1,57 +1,35 @@
+import { CoverageModel } from "./CoverageModel";
 import { EndpointModel } from "./EndpointModel";
+import { InputDataModel } from "./InputDataModel";
 
 export class WebhookModel {
     application: string;
-    apiTested: string;
-    createAt: Date;
+    apiUrl: string;
     buildNumber: string;
-    totalEndpointsFound: number;
-    totalEndpointsTested: number;
+    executeAt: Date;
+    existingEndpoints: number;
+    testedEndpoints: number;
     coverage: number;
-    totalTime: number;
-    totalSucceed: number;
     totalFailure: number;
-    endpointsFound: Array<EndpointModel>;
-    endpointsTested: Array<EndpointModel>;
-    endpointsUncover: Array<EndpointModel>;
+    coverEndpoints: Array<EndpointModel>;
+    uncoverEndpoints: Array<EndpointModel>;
 
-    constructor(
-        application: string,
-        apiTested: string,
-        buildNumber: string,
-        totalEndpointsFound: number,
-        totalEndpointsTested: number,
-        coverage: number,
-        endpointsFound: Array<EndpointModel>,
-        endpointsTested: Array<EndpointModel>,
-        endpointsUncover: Array<EndpointModel>) {
-        this.application = application;
-        this.apiTested = apiTested;
-        this.createAt = new Date();
-        this.buildNumber = buildNumber;
-        this.totalEndpointsFound = totalEndpointsFound;
-        this.totalEndpointsTested = totalEndpointsTested;
-        this.coverage = coverage;
-        this.endpointsFound = endpointsFound;
-        this.endpointsTested = endpointsTested; 
-        this.endpointsUncover = endpointsUncover;
+    constructor(inputData: InputDataModel, coverage: CoverageModel) {
+        if(!inputData.application)
+            throw new Error("The application name is required.");
+        if(!inputData.buildNumber)
+            throw new Error("The build number of the application is required.")
 
-        this.totalTime = endpointsTested.reduce((accumulator, current) =>{
-            return accumulator + current.infoPath.reduce((ac, cu) => {
-                return ac + cu.time;
-            }, 0);
-        }, 0);
+        this.application = inputData.application;
+        this.apiUrl = inputData.url;
+        this.buildNumber = inputData.buildNumber;
+        this.executeAt = new Date();
 
-        this.totalSucceed = endpointsTested.reduce((accumulator, current) =>{
-            return accumulator + current.infoPath.filter(f => f.success).reduce((ac, cu) => {
-                return ac + cu.time;
-            }, 0);
-        }, 0);
-
-        this.totalFailure = endpointsTested.reduce((accumulator, current) =>{
-            return accumulator + current.infoPath.filter(f => !f.success).reduce((ac, cu) => {
-                return ac + cu.time;
-            }, 0);
-        }, 0);
+        this.existingEndpoints = coverage.existed;
+        this.testedEndpoints = coverage.tested;
+        this.coverage = coverage.coverage;
+        this.totalFailure = coverage.cover.filter(f => !f.isSuccess).length;
+        this.coverEndpoints = coverage.cover;
+        this.uncoverEndpoints = coverage.uncover;
     }
 }

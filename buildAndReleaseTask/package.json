@@ -10,7 +10,8 @@
     "changeEnvironment": "del ..\\dist\\environments\\environment.js && rename ..\\dist\\environments\\environment.prod.js environment.js",
     "copyTaskToDist": "copy task.json ..\\dist",
     "copyTaskToBuild": "copy ..\\task.json ..\\buildAndReleaseTask",
-    "copyNodeModules": "Xcopy node_modules ..\\dist\\node_modules /E/H/C/I"
+    "copyNodeModules": "Xcopy node_modules ..\\dist\\node_modules /E/H/C/I",
+    "debug": "npm run deleteDist && tsc && npm run copyNodeModules && npm run start"
   },
   "author": "AlexAlves",
   "license": "ISC",

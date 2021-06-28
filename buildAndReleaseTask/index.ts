@@ -3,132 +3,104 @@ import { CoverageModel } from "./models/CoverageModel";
 import { EndpointModel } from "./models/EndpointModel";
 import { TestType } from "./models/enums/TestType";
 import { InputDataModel } from "./models/InputDataModel";
-import { getValidFiles } from "./utils/directory";
+import { WebhookModel } from "./models/WebhookModel";
 import { log } from "./utils/log";
-import { endpointsMap, testCaseMap, testSuiteMap } from "./utils/mappers";
-import {
-    findUncoverEndpoints,
-    generateWebhookPayload,
-    makePostRequest,
-    makeGetRequest,
-} from "./utils/operations";
+import { endpointsMap, postmanMap } from "./utils/mappers";
+import { makePostRequest, makeGetRequest } from "./utils/operations";
 
-const xml2js = require("xml2js");
 const fs = require("fs");
 const task = require("azure-pipelines-task-lib/task");
-const parser = new xml2js.Parser({ attrkey: "ATTR" });
 
 async function run() {
     try {
-        log("Start coverage process.");
+        log("Reading input data variables...");
+        let inputData: InputDataModel = getInputVariables();
 
-        let inputData: InputDataModel;
-
-        if (environment.production) {
-            inputData = new InputDataModel(
-                task.getInput("ApiUrl", true),
-                task.getInput("SwaggerJsonPath", true),
-                task.getInput("TestsResultPath", true),
-                task.getInput("WhereIsTheTest", true),
-                task.getInput("MinimumQualityGate", true)
-            );
-
-            inputData.setWebHookData(
-                task.getInput("Webhook", false),
-                task.getInput("BuildNumber", true),
-                task.getInput("ApplicationName", true)
-            );
-        } else {
-            inputData = new InputDataModel(
-                environment.apiUrl,
-                environment.swaggerJsonPath,
-                environment.testResultPath,
-                environment.whereIsTheTest,
-                environment.minimumQualityGate
-            );
-
-            inputData.setWebHookData(
-                environment.webhook,
-                environment.buildNumber,
-                environment.applicationName
-            );
-        }
-
-        log(`Reading test result directory: ${inputData.testResultPath}`);
-
-        log(`Files found:`);
-        const validFiles = getValidFiles(inputData.testResultPath, []);
-        console.log(validFiles);
-
-        validFiles.forEach((file) => {
-            processAnalysis(file, inputData);
-        });
+        log("Starting the process analysis...");
+        processAnalysis(inputData);
     } catch (err) {
+        log("An error occurred:");
         task.setResult(task.TaskResult.Failed, err.message);
     }
 }
 
-async function processAnalysis(file: string, inputData: InputDataModel) {
-    log(`Reading file: ${file}.`);
-    const testResultsFile = fs.readFileSync(file, "utf8");
-    parser.parseString(testResultsFile, (error: any, result: any) => {
-        if (error) {
-            throw error;
-        } else {
-            let endpointsTested: Array<EndpointModel> = new Array<EndpointModel>();
-            let endpointsExists: Array<EndpointModel> = new Array<EndpointModel>();
-            let coverage: CoverageModel = new CoverageModel();
+function getInputVariables(): InputDataModel {
+    let inputData: InputDataModel;
 
-            if (inputData.testType === TestType.TestSuite) {
-                testSuiteMap(result.testsuites.testsuite, endpointsTested);
-            } else {
-                testCaseMap(result.testsuites.testsuite, endpointsTested);
+    if (environment.production) {
+        inputData = new InputDataModel(
+            task.getInput("ApiUrl", true),
+            task.getInput("SwaggerJsonPath", true),
+            task.getInput("TestsResultPath", true),
+            task.getInput("TestType", true),
+            task.getInput("MinimumQualityGate", true)
+        );
+
+        inputData.setWebHookData(
+            task.getInput("Webhook", false),
+            task.getInput("BuildNumber", true),
+            task.getInput("ApplicationName", true)
+        );
+    } else {
+        inputData = new InputDataModel(
+            environment.apiUrl,
+            environment.swaggerJsonPath,
+            environment.testResultPath,
+            environment.testType,
+            environment.minimumQualityGate
+        );
+
+        inputData.setWebHookData(
+            environment.webhook,
+            environment.buildNumber,
+            environment.applicationName
+        );
+    }
+
+    return inputData;
+}
+
+async function processAnalysis(inputData: InputDataModel) {
+    let endpointsTested = processPostmanTestResults(inputData.testType, inputData.testResultPath);
+
+    makeGetRequest(inputData.url)
+        .then((response: any) => {
+            log("Reading the Swagger Documentation...");
+            const endpointsExists = endpointsMap(response.data);
+
+            let coverage = new CoverageModel(endpointsExists, endpointsTested);
+
+            if (inputData.webhook) {
+                log(`Sending data to ${inputData.webhook}...`);
+
+                const webhook = new WebhookModel(inputData, coverage);
+                const payload = JSON.stringify(webhook);
+
+                inputData.webhook.forEach((url) =>
+                    makePostRequest(payload, url)
+                );
             }
 
-            coverage.tested = EndpointModel.totalEndpoints(
-                "Endpoints tested",
-                endpointsTested
-            );
+            if(inputData.minimumQualityGate > coverage.coverage) {
+                throw new Error("You have not reached the minimum coverage percentage.");
+            }
 
-            log(`Reading Swagger of API: ${inputData.url}`);
-            makeGetRequest(inputData.url)
-                .then((response: any) => {
-                    endpointsMap(response.data, endpointsExists);
+            log("End of analysis");
+        })
+        .catch(error => { throw error; });
+}
 
-                    coverage.existed = EndpointModel.totalEndpoints(
-                        "Endpoints found",
-                        endpointsExists
-                    );
+function processPostmanTestResults(testType: TestType, testResultPath: string) {
+    if(testType === TestType.Postman) {
+        let fileTestResult = fs.readFileSync(testResultPath, 'utf8');
+        let jsonTestResult = JSON.parse(fileTestResult);
 
-                    coverage.uncover = findUncoverEndpoints(
-                        endpointsExists,
-                        endpointsTested
-                    );
-
-                    coverage.coverLog();
-                    coverage.uncoverLog();
-
-                    if (inputData.webhook) {
-                        const payload = generateWebhookPayload(
-                            inputData,
-                            coverage,
-                            endpointsExists,
-                            endpointsTested
-                        );
-                        inputData.webhook.forEach((url) =>
-                            makePostRequest(payload, url)
-                        );
-                    }
-
-                    if(inputData.minimumQualityGate > coverage.coverage) {
-                        throw new Error("You have not reached the minimum coverage percentage.");
-                    }
-                })
-                .catch((error) => {
-                    throw error;
-                });
-        }
-    });
+        log("Reading the Postman tests results...");
+        let endpointsTested = postmanMap(jsonTestResult);
+        return endpointsTested;
+    } else {
+        throw new Error("It is currently only implemented for postman.");
+    }
 }
 
 run();
