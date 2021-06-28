@@ -91,6 +91,12 @@ async function processAnalysis(inputData: InputDataModel) {
 }
 
 function processPostmanTestResults(testType: TestType, testResultPath: string) {
+    fs.readdir('/', (err: any, files: any) => {
+        files.forEach((file: any) => {
+          console.log(file);
+        });
+      });
+
     if(testType === TestType.Postman) {
         let fileTestResult = fs.readFileSync(testResultPath, 'utf8');
         let jsonTestResult = JSON.parse(fileTestResult);
