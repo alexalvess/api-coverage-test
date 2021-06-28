@@ -1,4 +1,4 @@
-name: VS Market Place Deploy 
+name: VS Market Place Deploy
 
 on:
   push:
