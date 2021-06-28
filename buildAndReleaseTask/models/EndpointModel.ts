@@ -1,6 +1,3 @@
-import path from "path";
-import { log } from "../utils/log";
-
 export class EndpointModel {
     public id: string;
     public path: string;

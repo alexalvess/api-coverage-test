@@ -7,5 +7,6 @@ export const environment = {
     webhook: '',
     buildNumber: '123456',
     applicationName: 'Teste',
-    minimumQualityGate: 0
+    minimumQualityGate: 0,
+    debugger: false
 }

@@ -1,5 +1,4 @@
 import { EndpointModel } from "../models/EndpointModel";
-import { log } from "./log";
 
 export function postmanMap(testResult: any): EndpointModel[] {
     if(!testResult)

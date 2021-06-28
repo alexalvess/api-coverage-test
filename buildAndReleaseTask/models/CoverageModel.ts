@@ -1,4 +1,4 @@
-import { log } from "../utils/log";
+import { information } from "../utils/log";
 import { EndpointModel } from "./EndpointModel";
 
 export class CoverageModel {
@@ -25,7 +25,7 @@ export class CoverageModel {
                 return el;
         });
 
-        log("Analysis result generated:");
+        information("Analysis result generated:");
         console.log(`Existing endpoints: ${this.existed}`);
         console.log(`Tested endpoints: ${this.tested}`);
         console.log(`Untested endpoints: ${this.totalUncover}`);

@@ -62,6 +62,13 @@
       "required": true
     },
     {
+      "name": "Debugger",
+      "type": "boolean",
+      "label": "Debug Mode",
+      "defaultValue": false,
+      "required": true
+    },
+    {
       "name": "Webhook",
       "type": "string",
       "label": "Webhooks",
