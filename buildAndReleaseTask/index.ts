@@ -3,27 +3,21 @@ import { CoverageModel } from "./models/CoverageModel";
 import { EndpointModel } from "./models/EndpointModel";
 import { TestType } from "./models/enums/TestType";
 import { InputDataModel } from "./models/InputDataModel";
+import { WebhookModel } from "./models/WebhookModel";
 import { log } from "./utils/log";
 import { endpointsMap, postmanMap } from "./utils/mappers";
-import {
-    findUncoverEndpoints,
-    generateWebhookPayload,
-    makePostRequest,
-    makeGetRequest,
-} from "./utils/operations";
+import { makePostRequest, makeGetRequest } from "./utils/operations";
 
 const fs = require("fs");
 const task = require("azure-pipelines-task-lib/task");
 
 async function run() {
     try {
-        log("Reading input data variables");
+        log("Reading input data variables...");
         let inputData: InputDataModel = getInputVariables();
-        log("Input data variables was read")
 
-        log("Starting the process analysis");
+        log("Starting the process analysis...");
         processAnalysis(inputData);
-        log("The process analysis ended");
     } catch (err) {
         log("An error occurred:");
         task.setResult(task.TaskResult.Failed, err.message);
@@ -67,34 +61,21 @@ function getInputVariables(): InputDataModel {
 }
 
 async function processAnalysis(inputData: InputDataModel) {
-    let endpointsTested: EndpointModel[];
-
-    if(inputData.testType === TestType.Postman) {
-        let fileTestResult = fs.readFileSync(inputData.testResultPath, 'utf8');
-        let jsonTestResult = JSON.parse(fileTestResult);
-
-        log("Reading the Postman tests results");
-        endpointsTested = postmanMap(jsonTestResult);
-        log("The Postman test result was read");
-    } else {
-        throw new Error("It is currently only implemented for postman.");
-    }
+    let endpointsTested = processPostmanTestResults(inputData.testType, inputData.testResultPath);
 
     makeGetRequest(inputData.url)
         .then((response: any) => {
-            log("Reading the Swagger Documentation");
+            log("Reading the Swagger Documentation...");
             const endpointsExists = endpointsMap(response.data);
-            log("The Swagger Documentation was read");
 
-            let coverage: CoverageModel = new CoverageModel(endpointsExists, endpointsTested);
+            let coverage = new CoverageModel(endpointsExists, endpointsTested);
 
             if (inputData.webhook) {
-                const payload = generateWebhookPayload(
-                    inputData,
-                    coverage,
-                    endpointsExists,
-                    endpointsTested
-                );
+                log(`Sending data to ${inputData.webhook}...`);
+
+                const webhook = new WebhookModel(inputData, coverage);
+                const payload = JSON.stringify(webhook);
+
                 inputData.webhook.forEach((url) =>
                     makePostRequest(payload, url)
                 );
@@ -103,8 +84,23 @@ async function processAnalysis(inputData: InputDataModel) {
             if(inputData.minimumQualityGate > coverage.coverage) {
                 throw new Error("You have not reached the minimum coverage percentage.");
             }
+
+            log("End of analysis");
         })
         .catch(error => { throw error; });
+}
+
+function processPostmanTestResults(testType: TestType, testResultPath: string) {
+    if(testType === TestType.Postman) {
+        let fileTestResult = fs.readFileSync(testResultPath, 'utf8');
+        let jsonTestResult = JSON.parse(fileTestResult);
+
+        log("Reading the Postman tests results...");
+        let endpointsTested = postmanMap(jsonTestResult);
+        return endpointsTested;
+    } else {
+        throw new Error("It is currently only implemented for postman.");
+    }
 }
 
 run();

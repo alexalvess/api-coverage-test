@@ -40,7 +40,5 @@ export function endpointsMap(body: any): EndpointModel[] {
         });
     });
 
-    console.log(endpointsExists);
-
     return endpointsExists;
 }
