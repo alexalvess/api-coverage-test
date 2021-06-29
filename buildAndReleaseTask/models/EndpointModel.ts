@@ -15,7 +15,7 @@ export class EndpointModel {
         return new EndpointModel(id, path, verb, isSuccess);
     }
 
-    public static buildFullPath(paths: string[], queries: {key: string, value: string}[]): string {
+    public static buildFullPath(paths: string[], queries: {key: string, value: string}[], variables: [any]): string {
         let fullPath = '';
 
         if(!paths || paths.length === 0)
@@ -24,9 +24,14 @@ export class EndpointModel {
         paths.forEach(el => {
             if(el.includes(':'))
                 fullPath += `/{${el.slice(1)}}`;
-            else
+            else if(el.includes('{{')) {
+                const key = el.replace('{{', '').replace('}}', '');
+                fullPath += `/${variables.find(f => f.key === key)?.value}`
+            } else
                 fullPath += `/${el}`;
         });
+
+        fullPath = fullPath.substring(fullPath.indexOf("/api"));
 
         queries.forEach((el, index) => {
             if(index === 0)
