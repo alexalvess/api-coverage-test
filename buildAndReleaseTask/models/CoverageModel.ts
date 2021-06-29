@@ -18,7 +18,7 @@ export class CoverageModel {
         this.uncover = endpointExists
             .map(el => new EndpointModel('', el.path, el.verb, true))
             .filter(el => {
-                if(this.uncover.filter(f => f.verb === el.verb && f.path === el.path).length === 0)
+                if(this.cover.filter(f => f.verb === el.verb && f.path === el.path).length === 0)
                     return el;
             });
 
