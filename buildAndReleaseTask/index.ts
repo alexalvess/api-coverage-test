@@ -97,6 +97,7 @@ function processPostmanTestResults(testType: TestType, testResultPath: string) {
         debug(`Files found in Directory: ${JSON.stringify(files)}`);
     });
 
+    debug(`Test type selected: ${testType}`);
     if(testType === TestType.Postman) {
         let fileTestResult = fs.readFileSync(testResultPath, 'utf8');
         let jsonTestResult = JSON.parse(fileTestResult);

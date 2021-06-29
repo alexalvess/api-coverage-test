@@ -4,17 +4,17 @@ export function postmanMap(testResult: any): EndpointModel[] {
     if(!testResult)
         throw new Error("No test were found.");
 
-    return discoverPath(testResult.collection.item, testResult.run.executions, []);
+    return discoverPath(testResult.collection.item, testResult.run.executions, testResult.environment.values, []);
 }
 
-function discoverPath(items: [], executions: [], paths: Array<EndpointModel>): Array<EndpointModel> {
+function discoverPath(items: [], executions: [], variables: [any], paths: Array<EndpointModel>): Array<EndpointModel> {
     items.forEach((el: any) => {
         if(el.item)
-            return discoverPath(el.item, executions, paths);
+            return discoverPath(el.item, executions, variables, paths);
 
         const success = hasError(executions, el.id);
         
-        const fullPath = EndpointModel.buildFullPath(el.request.url.path, el.request.url.query);
+        const fullPath = EndpointModel.buildFullPath(el.request.url.path, el.request.url.query, variables);
         paths.push(new EndpointModel(el.id, fullPath, el.request.method, !success));
     });
 
