@@ -25,8 +25,8 @@ export class WebhookModel {
         this.buildNumber = inputData.buildNumber;
         this.executeAt = new Date();
 
-        this.existingEndpoints = coverage.existed;
-        this.testedEndpoints = coverage.tested;
+        this.existingEndpoints = coverage.existingEndpoints;
+        this.testedEndpoints = coverage.testedEndpoints;
         this.coverage = coverage.coverage;
         this.totalFailure = coverage.cover.filter(f => !f.isSuccess).length;
         this.coverEndpoints = coverage.cover;
