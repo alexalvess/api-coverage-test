@@ -36,7 +36,7 @@ jobs:
       run: npm run build --prefix ./buildAndReleaseTask
 
   artifact:
-    if: (github.event_name == 'push' || github.event_name == 'pull_request') && github.ref != 'refs/heads/master'
+    if: github.event_name == 'push' && github.ref == 'refs/heads/master'
 
     name: Generate Artifact
 
