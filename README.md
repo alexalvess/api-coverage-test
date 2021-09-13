@@ -39,9 +39,6 @@ $ tfx extension create --manifest-globs vss-extension.json
 ```
 And upload the file generate in Visual Studio Market Place
 
-### Now, let's see the pipeline execution
-![Pipeline execution](https://raw.githubusercontent.com/alexalvess/api-coverage-test/master/images/pipelineexecution.png)
-
 ---
 
 ## Look the all documentation:
